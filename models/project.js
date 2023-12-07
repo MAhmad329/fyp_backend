@@ -1,11 +1,26 @@
 var mongoose = require("mongoose");
 
 var projectSchema = new mongoose.Schema({
-  title: String,
-  description: String,
-  type: String,
-  technologystack: String,
+  title: {
+    type: String,
+    required: true,
+  },
+
+  description: {
+    type: String,
+    required: true,
+    },
   
+  type: {
+    type: String,
+    required: true,
+    },
+  
+  technologystack: {
+    type: String,
+    required: true,
+    },
+
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Company",

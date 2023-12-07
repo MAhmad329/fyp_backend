@@ -13,7 +13,7 @@ exports.isCompanyAuthenticated = async (req, res, next) => {
 
     const decoded = await jwt.verify(token, "creatingatestJWTkey");
 
-    req.candidate = await Companies.findById(decoded._id);
+    req.company = await Companies.findById(decoded._id);
 
     next();
   } catch (error) {
@@ -34,7 +34,7 @@ exports.isAuthenticated = async (req, res, next) => {
 
     const decoded = await jwt.verify(token, "creatingatestJWTkey");
 
-    req.recruiter = await Freelancer.findById(decoded._id);
+    req.freelancer = await Freelancer.findById(decoded._id);
 
     next();
   } catch (error) {

@@ -7,9 +7,12 @@ exports.createProject = async (req, res) => {
     const newProjectData = {
       title: req.body.title,
       description: req.body.description,
+      budget: req.body.budget,
+      type: req.body.type,
+      technologystack: req.body.technologystack,
       owner: req.company._id,
     };
-    const newProject = await Jobs.create(newProjectData);
+    const newProject = await Projects.create(newProjectData);
     const company = await Companies.findById(req.company._id);
     company.projects.push(newProject._id);
     await company.save();
