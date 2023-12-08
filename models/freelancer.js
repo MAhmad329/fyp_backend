@@ -33,6 +33,13 @@ var freelancerSchema = new mongoose.Schema({
     select: false, // Means when we'll Access user's data we'll get all user information except this (i.e Password)
   },
 
+  appliedProjects: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
+    },
+  ],
+
   resetPasswordToken: String,
   resetPasswordDate: Date,
 });

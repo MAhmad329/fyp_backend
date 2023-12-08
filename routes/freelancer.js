@@ -6,6 +6,8 @@ const {
 //   getMyFreelancerProfile,
 //   updateFreelancerProfile,
 } = require("../controllers/freelancer");
+
+
 var router = express.Router();
 const { isAuthenticated } = require("../middlewares/auth");
 
@@ -17,6 +19,8 @@ router.get("/Freelancer", function (req, res, next) {
 router.route("/Freelancer/register").post(registerFreelancer);
 router.route("/Freelancer/login").post(loginFreelancer);
 router.route("/Freelancer/logout").get(logoutFreelancer);
+
+
 // router
 //   .route("/Freelancer/updateprofile")
 //   .put(isAuthenticated, updateFreelancerProfile);

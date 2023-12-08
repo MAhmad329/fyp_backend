@@ -1,5 +1,5 @@
 const Companies = require("../models/company");
-// const Recruiters = require("../models/recruiter");
+const Freelancers = require("../models/freelancer");
 const jwt = require("jsonwebtoken");
 
 exports.isCompanyAuthenticated = async (req, res, next) => {
@@ -34,7 +34,7 @@ exports.isAuthenticated = async (req, res, next) => {
 
     const decoded = await jwt.verify(token, "creatingatestJWTkey");
 
-    req.freelancer = await Freelancer.findById(decoded._id);
+    req.freelancer = await Freelancers.findById(decoded._id);
 
     next();
   } catch (error) {
