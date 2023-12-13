@@ -3,6 +3,8 @@ const {
   registerFreelancer,
   loginFreelancer,
   logoutFreelancer,
+  getFreelancerDetails,
+  updateFreelancerProfile,
 //   getMyFreelancerProfile,
 //   updateFreelancerProfile,
 } = require("../controllers/freelancer");
@@ -19,7 +21,8 @@ router.get("/Freelancer", function (req, res, next) {
 router.route("/Freelancer/register").post(registerFreelancer);
 router.route("/Freelancer/login").post(loginFreelancer);
 router.route("/Freelancer/logout").get(logoutFreelancer);
-
+router.route("/Freelancer/details").get(isAuthenticated, getFreelancerDetails);
+router.route("/Freelancer/updateprofile").put(isAuthenticated, updateFreelancerProfile);
 
 // router
 //   .route("/Freelancer/updateprofile")

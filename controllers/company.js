@@ -11,7 +11,7 @@ exports.loginCompany = async (req, res) => {
     if (!company) {
       return res.status(400).json({
         success: false,
-        message: "User with this email does not exists",
+        message: "User with this email does not exist",
       });
     }
     const isMatch = await company.matchPassword(password);
@@ -59,9 +59,18 @@ exports.logoutCompany = async (req, res) => {
 
 exports.registerCompany = async (req, res) => {
   try {
-    const { companyname, name, email, password } = req.body;
-    let company = await Companies.findOne({ email });
-    if (company) {
+    const { companyname, businessAddress, name, email, password } = req.body;
+    let focalpersonemail = await Companies.findOne({ email });
+    let nameofcompany = await Companies.findOne({ companyname });
+    
+    if (nameofcompany) {
+      return res.status(400).json({
+        success: false,
+        message: "Company name already exists",
+      });
+    }
+
+    if (focalpersonemail) {
       return res.status(400).json({
         success: false,
         message: "User already Exists",
@@ -70,6 +79,7 @@ exports.registerCompany = async (req, res) => {
 
     company = await Companies.create({
       companyname,  
+      businessAddress,
       name,
       email,
       password,

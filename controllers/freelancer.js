@@ -62,6 +62,7 @@ exports.registerFreelancer = async (req, res) => {
   try {
     const { firstname, lastname, username, email, password } = req.body;
     let freelancer = await Freelancers.findOne({ email });
+    console.log(req.body);
     if (freelancer) {
       return res.status(400).json({
         success: false,
@@ -91,6 +92,101 @@ exports.registerFreelancer = async (req, res) => {
     });
   }
 };
+
+
+exports.getFreelancerDetails = async (req, res) => {
+  try {
+    const freelancerId = req.freelancer._id; // Use the authenticated freelancer's ID
+
+    const freelancer = await Freelancers.findById(freelancerId);
+
+    if (!freelancer) {
+      return res.status(404).json({
+        success: false,
+        message: "Freelancer not found",
+      });
+    }
+
+    // You can customize the response based on what details you want to send to the client
+    const freelancerDetails = {
+      firstname: freelancer.firstname,
+      lastname: freelancer.lastname,
+      username: freelancer.username,
+      email: freelancer.email,
+      aboutme: freelancer.aboutme,
+      skills: freelancer.skills,
+      education: freelancer.education,
+      experience: freelancer.experience,
+      // Add other details as needed
+    };
+
+    res.status(200).json({
+      success: true,
+      freelancer: freelancerDetails,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+exports.updateFreelancerProfile = async (req, res) => {
+  try {
+    const freelancerId = req.freelancer._id; // Use the authenticated freelancer's ID
+
+    // Find the freelancer by ID
+    const freelancer = await Freelancers.findById(freelancerId);
+
+    if (!freelancer) {
+      return res.status(404).json({
+        success: false,
+        message: "Freelancer not found",
+      });
+    }
+
+    // Extract the fields you want to update from the request body
+    const { firstname, lastname, username, aboutme, skills, education, experience } = req.body;
+
+    // Update the freelancer's profile details
+    if (firstname) freelancer.firstname = firstname;
+    if (lastname) freelancer.lastname = lastname;
+    if (username) freelancer.username = username;
+    if (aboutme) freelancer.aboutme = aboutme;
+    if (skills) freelancer.skills = skills;
+    if (education) freelancer.education = education;
+    if (experience) freelancer.experience = experience;
+
+    // Save the updated freelancer profile
+    await freelancer.save();
+
+    // You can customize the response based on what details you want to send to the client
+    const updatedFreelancerDetails = {
+      firstname: freelancer.firstname,
+      lastname: freelancer.lastname,
+      username: freelancer.username,
+      aboutme: freelancer.aboutme,
+      skills: freelancer.skills,
+      education: freelancer.education,
+      experience: freelancer.experience,
+      // Add other details as needed
+    };
+
+    res.status(200).json({
+      success: true,
+      freelancer: updatedFreelancerDetails,
+      message: "Profile Updated",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 
 // exports.updatePassword = async (req, res) => {
 //   try {
