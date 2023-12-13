@@ -40,7 +40,8 @@ var projectSchema = new mongoose.Schema({
   // Flag to indicate whether the project requires a team or a single freelancer
   requiresTeam: {
     type: Boolean,
-    default: false, // Change to true if the project requires a team
+    default:false,
+     // Change to true if the project requires a team
   },
 
   // ID of the selected freelancer or team for the project

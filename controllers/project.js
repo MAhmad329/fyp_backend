@@ -10,12 +10,13 @@ exports.createProject = async (req, res) => {
       budget: req.body.budget,
       type: req.body.type,
       technologystack: req.body.technologystack,
-      owner: req.company._id,
+      requiresTeam: req.body.requiresTeam,
+     // owner: req.company._id,
     };
     const newProject = await Projects.create(newProjectData);
-    const company = await Companies.findById(req.company._id);
-    company.projects.push(newProject._id);
-    await company.save();
+    //const company = await Companies.findById(req.company._id);
+    //company.projects.push(newProject._id);
+    //await company.save();
 
     res.status(201).json({
       success: true,
