@@ -19,6 +19,7 @@ var freelancerSchema = new mongoose.Schema({
     required: [true, "Please enter a username"],
     unique: [true, "Username already Exists"],
   },
+
   
   email: {
     type: String,
@@ -33,6 +34,33 @@ var freelancerSchema = new mongoose.Schema({
     select: false, // Means when we'll Access user's data we'll get all user information except this (i.e Password)
   },
 
+  
+  aboutme: {
+    type: String,
+    required: true,
+  },
+
+  skills: [{
+    type: String,
+    required: true,
+  }],
+
+  education: [{
+    type: String,
+    required: true,
+  }],
+
+  experience: [{
+    type: String,
+    required: true,
+  }],
+
+  PhoneNo: {
+    type: String,
+    minLength: [11, "Phone Number must be 11 digits"],
+    unique: [true, "Phone Number already Exists"]
+  }
+,
   appliedProjects: [
     {
       type: mongoose.Schema.Types.ObjectId,

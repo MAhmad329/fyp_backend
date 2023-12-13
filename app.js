@@ -56,7 +56,7 @@ app.use(express.urlencoded({ extended: true }));
 // app.use("/users", usersRouter);
 // app.use("/api/v1", postRouter);
 // app.use("/api/v1", userRouter);
- app.use("/api/v1", projectRouter);
+app.use("/api/v1", projectRouter);
 app.use("/api/v1", companyRouter);
 // app.use("/api/v1", firebaseRouter);
 app.use("/api/v1", freelancerRouter);

@@ -92,11 +92,11 @@ exports.searchProjects = async (req, res) => {
       });
     }
 
-    const projects = await Projects.find({ title: { $regex: new RegExp(title, "i") } });
+    const project = await Projects.find({ title: { $regex: new RegExp(title, "i") } });
 
     res.status(200).json({
       success: true,
-      projects,
+      project,
     });
   } catch (error) {
     res.status(500).json({

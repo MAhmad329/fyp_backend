@@ -10,6 +10,12 @@ var companySchema = new mongoose.Schema({
     unique: true,
   },
 
+  businessAddress: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+
   name: {
     type: String,
     required: true,
