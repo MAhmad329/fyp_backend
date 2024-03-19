@@ -11,6 +11,7 @@ exports.createProject = async (req, res) => {
       type: req.body.type,
       technologystack: req.body.technologystack,
       owner: req.company._id,
+      
     };
     const newProject = await Projects.create(newProjectData);
     const company = await Companies.findById(req.company._id);
