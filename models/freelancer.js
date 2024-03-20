@@ -20,6 +20,11 @@ var freelancerSchema = new mongoose.Schema({
     unique: [true, "Username already Exists"],
   },
 
+  pfp: {
+    type: String,
+  },
+
+
   
   email: {
     type: String,

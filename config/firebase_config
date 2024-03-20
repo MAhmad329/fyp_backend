@@ -1,8 +1,8 @@
 exports.firebaseConfig = {
-    apiKey: "AIzaSyDrBVU68SEwlAE27pQ1FVuAj0v_-0bYmsE",
-    authDomain: "final-year-project-e2eca.firebaseapp.com",
-    projectId: "final-year-project-e2eca",
-    storageBucket: "final-year-project-e2eca.appspot.com",
-    messagingSenderId: "211549487183",
-    appId: "1:211549487183:web:933783b5843f175831ea3a"
-  };
+  apiKey: "AIzaSyDvRKSie8SpbApR9f6h-TMdJ8nDxAsWVJg",
+  authDomain: "outsourcepro-4ae18.firebaseapp.com",
+  projectId: "outsourcepro-4ae18",
+  storageBucket: "outsourcepro-4ae18.appspot.com",
+  messagingSenderId: "286866234337",
+  appId: "1:286866234337:web:1d57d4e0b9532e5e0dd0a0"
+};

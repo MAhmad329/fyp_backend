@@ -15,7 +15,7 @@ var cors = require("cors");
 // var userRouter = require("./routes/user");
 var projectRouter = require("./routes/project");
 var companyRouter = require("./routes/company");
-// var firebaseRouter = require("./routes/firebase");
+var firebaseRouter = require("./routes/firebase");
 var freelancerRouter = require("./routes/freelancer");
 
 var app = express();
@@ -56,9 +56,10 @@ app.use(express.urlencoded({ extended: true }));
 // app.use("/users", usersRouter);
 // app.use("/api/v1", postRouter);
 // app.use("/api/v1", userRouter);
+
 app.use("/api/v1", projectRouter);
 app.use("/api/v1", companyRouter);
-// app.use("/api/v1", firebaseRouter);
+app.use("/api/v1", firebaseRouter);
 app.use("/api/v1", freelancerRouter);
 
 // catch 404 and forward to error handler

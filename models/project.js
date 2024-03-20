@@ -50,6 +50,12 @@ var projectSchema = new mongoose.Schema({
     default: null, // No one is selected initially
   },
 
+  selectedTeam: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Team", // Default reference
+    default: null, // No one is selected initially
+  },
+
   // Budget for the project
   budget: {
     type: Number,

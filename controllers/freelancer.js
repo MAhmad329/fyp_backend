@@ -60,7 +60,7 @@ exports.logoutFreelancer = async (req, res) => {
 
 exports.registerFreelancer = async (req, res) => {
   try {
-    const { firstname, lastname, username, email, password } = req.body;
+    const { firstname, lastname, username, email, password ,pfp} = req.body;
     let freelancer = await Freelancers.findOne({ email });
     console.log(req.body);
     if (freelancer) {
@@ -76,6 +76,7 @@ exports.registerFreelancer = async (req, res) => {
       username,
       email,
       password,
+      pfp
     //   avatar,
     //   bio,
       // avatar: {
@@ -117,6 +118,7 @@ exports.getFreelancerDetails = async (req, res) => {
       skills: freelancer.skills,
       education: freelancer.education,
       experience: freelancer.experience,
+      pfp: freelancer.pfp,
       // Add other details as needed
     };
 
@@ -148,7 +150,7 @@ exports.updateFreelancerProfile = async (req, res) => {
     }
 
     // Extract the fields you want to update from the request body
-    const { firstname, lastname, username, aboutme, skills, education, experience } = req.body;
+    const { firstname, lastname, username, aboutme, skills, education, experience,pfp } = req.body;
 
     // Update the freelancer's profile details
     if (firstname) freelancer.firstname = firstname;
@@ -158,6 +160,7 @@ exports.updateFreelancerProfile = async (req, res) => {
     if (skills) freelancer.skills = skills;
     if (education) freelancer.education = education;
     if (experience) freelancer.experience = experience;
+    if (pfp) freelancer.pfp = pfp;
 
     // Save the updated freelancer profile
     await freelancer.save();
@@ -171,6 +174,7 @@ exports.updateFreelancerProfile = async (req, res) => {
       skills: freelancer.skills,
       education: freelancer.education,
       experience: freelancer.experience,
+      pfp: freelancer.pfp
       // Add other details as needed
     };
 
