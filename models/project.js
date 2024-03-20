@@ -62,6 +62,10 @@ var projectSchema = new mongoose.Schema({
     required: true,
   },
   
+  requiredMembers: [
+    
+  ],
+  
   createdAt: {
     type: Date,
     default: Date.now,
