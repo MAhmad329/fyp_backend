@@ -11,6 +11,7 @@ exports.createProject = async (req, res) => {
       type: req.body.type,
       technologystack: req.body.technologystack,
       requiresTeam: req.body.requiresTeam,
+      requiredMembers: req.body.requiredMembers,
      // owner: req.company._id,
     };
     const newProject = await Projects.create(newProjectData);
@@ -85,6 +86,7 @@ exports.getAllProjects = async (req, res) => {
 exports.searchProjects = async (req, res) => {
   try {
     const { title } = req.body;
+    
 
     if (!title) {
       return res.status(400).json({
@@ -107,7 +109,7 @@ exports.searchProjects = async (req, res) => {
   }
 };
 
-exports.applyToProject = async (req, res) => {
+exports.applyToProjectAuthenticated = async (req, res) => {
   try {
     const  freelancerId  = req.freelancer._id;
     const  projectId  = req.params.id;
@@ -137,5 +139,80 @@ exports.applyToProject = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
+exports.applyToProject = async (req, res) => {
+  try {
+    //if authentication route
+    //const  freelancerId  = req.freelancer._id;
+    //const  projectId  = req.params.id;
+    //else jugaru without authentication
+    const freelancerId = req.body.freelancerID;
+    const  projectId  = req.params.id;
+
+    // Check if the freelancer has already applied to the project
+    const project = await Projects.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Project not found' });
+    }
+
+    if (project.freelancerApplicants.includes(freelancerId)) {
+      return res.status(400).json({ success: false, message: 'Freelancer already applied to the project.' });
+    }
+
+    // Update the project with the freelancer's application
+    project.freelancerApplicants.push(freelancerId);
+    await project.save();
+
+    // Optionally, update the freelancer model with the applied project
+    const freelancer = await Freelancer.findById(freelancerId);
+    if (!freelancer) {
+      res.status(400).json({ success: false, message: 'Freelancer null' });
+    }
+    else{
+      freelancer.appliedProjects.push(projectId);
+      await freelancer.save();
+    }
+
+
+    res.status(200).json({ success: true, message: 'Application successful.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
+
+
+exports.getProjectDetails = async (req, res) => {
+  try {
+    const projectId = req.params.id;
+
+    if (!projectId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Project ID is required.',
+      });
+    }
+
+    const project = await Projects.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found.',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      project,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
