@@ -30,28 +30,29 @@ var freelancerSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "Please enter a password"],
-    minLength: [6, "Password must be atleast 6 chars"],
+    minLength: [6, "PSassword must be atleast 6 chars"],
     select: false, // Means when we'll Access user's data we'll get all user information except this (i.e Password)
   },
 
   
   aboutme: {
     type: String,
+    required: true,
   },
 
   skills: [{
     type: String,
-    
+    required: true,
   }],
 
   education: [{
     type: String,
-    
+    required: true,
   }],
 
   experience: [{
     type: String,
-   
+    required: true,
   }],
 
   PhoneNo: {
