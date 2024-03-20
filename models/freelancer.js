@@ -37,23 +37,28 @@ var freelancerSchema = new mongoose.Schema({
   
   aboutme: {
     type: String,
-    required: true,
+    
   },
 
   skills: [{
     type: String,
-    required: true,
   }],
 
-  education: [{
-    type: String,
-    required: true,
-  }],
+  education: [
+    {
+    institution: { type: String },
+    course: { type: String},
+    startDate: { type: String},
+    endDate: { type: String},
+}],
+
 
   experience: [{
-    type: String,
-    required: true,
-  }],
+    jobtitle: { type: String },
+    company: { type: String},
+    startDate: { type: String},
+    endDate: { type: String},
+}],
 
   PhoneNo: {
     type: String,

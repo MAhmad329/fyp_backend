@@ -12,7 +12,7 @@ exports.createProject = async (req, res) => {
       technologystack: req.body.technologystack,
       requiresTeam: req.body.requiresTeam,
       requiredMembers: req.body.requiredMembers,
-     // owner: req.company._id,
+      owner: req.company._id,
     };
     const newProject = await Projects.create(newProjectData);
     const company = await Companies.findById(req.company._id);
