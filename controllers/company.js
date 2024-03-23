@@ -1,6 +1,7 @@
 // const User = require("../models/user");
 // const Post = require("../models/posts");
 const Companies = require("../models/company");
+const { sendEmail } = require("../middlewares/sendEmail");
 
 exports.loginCompany = async (req, res) => {
   try {

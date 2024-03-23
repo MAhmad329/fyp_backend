@@ -24,8 +24,11 @@ exports.isCompanyAuthenticated = async (req, res, next) => {
 };
 
 exports.isAuthenticated = async (req, res, next) => {
+  console.log(req)
+
   try {
     const { token } = req.cookies;
+    console.log(token)
     if (!token) {
       return res.status(401).json({
         message: "Please Login First",
