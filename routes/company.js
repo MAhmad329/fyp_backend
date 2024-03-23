@@ -3,6 +3,9 @@ const {
   registerCompany,
   loginCompany,
   logoutCompany,
+  forgetPassword,
+  resetPassword,
+  setNewPassword,
 //   getMyCompanyProfile,
 //   updateCompanyProfile,
 } = require("../controllers/company");
