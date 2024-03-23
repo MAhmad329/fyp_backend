@@ -17,6 +17,9 @@ router.get("/Company", function (req, res, next) {
 router.route("/Company/register").post(registerCompany);
 router.route("/Company/login").post(loginCompany);
 router.route("/Company/logout").get(logoutCompany);
+router.route("/Company/forgetpassword").post(forgetPassword)
+router.route("/Company/resetpassword").post(resetPassword)
+router.route("/Company/setnewpassword").put(setNewPassword)
 // router
 //   .route("/Company/updateprofile")
 //   .put(isAuthenticated, updateCompanyProfile);

@@ -73,6 +73,17 @@ companySchema.methods.getResetPasswordToken = function () {
   return resetToken;
 };
 
+companySchema.methods.getResetPasswordCode = function () {
+  let code = '';
+  for (let i = 0; i < 4; i++) {
+    code += Math.floor(Math.random() * 10); // Generate a random digit between 0 and 9
+  }
+  this.resetPasswordToken = code;
+  this.resetPasswordDate = Date.now() + 10 * 60 * 1000; // 10 mins
+
+  return code;
+};
+
 const Company = mongoose.model('Company', companySchema);
 
 module.exports = Company;

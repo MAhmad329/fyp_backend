@@ -100,6 +100,93 @@ exports.registerCompany = async (req, res) => {
   }
 };
 
+
+exports.forgetPassword = async (req,res)=>{
+  try {
+    const {email} = req.body;
+    const company = await Companies.findOne({email});
+    if(!company){
+      return res.status(400).json({
+        success: false,
+        message: "Company with this email does not exists",
+      });
+    }
+    const resetToken = await company.getResetPasswordCode();
+    await company.save()
+    await sendEmail({
+      email: company.email,
+      subject: "Reset Password",
+      message: `Use the following password verification code to change your password.This code is valid only for 10 mins. Your password reset code is: ${resetToken} If you have not requested this email then please ignore it`,
+
+    })
+    console.log(resetToken);
+    res.status(200).json({
+      success: true,
+      resetToken,
+      message: `Reset password verification code sent to ${email}`,
+    });
+  }   
+  catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+exports.resetPassword = async (req,res)=>{
+  try {
+    const {resetPasswordToken} = req.body;
+    // const resetPasswordToken = crypto
+    // .createHash("sha256")
+    // .update(req.params.token)
+    // .digest("hex");
+    console.log(resetPasswordToken)
+    const user = await Companies.findOne({
+      resetPasswordToken,
+      resetPasswordDate: { $gt: Date.now() },
+    });
+    console.log(user)
+  
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Reset password verification code is invalid or has been expired",
+      });
+    }
+    // user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordDate = undefined;
+    await user.save();
+    res.status(200).json({
+      success: true,
+      email:user.email, //user email to use for new password reset
+      message: "Password reset code verified successfully",
+    });
+  }catch(err){
+    console.log(err);
+    res.sendStatus(400);
+  }
+};
+exports.setNewPassword = async (req,res)=>{
+  try {
+    const {email,password} = req.body;
+    console.log(email)
+    console.log(password)
+    const company = await Companies.findOne({ email });
+    company.password = password
+    await company.save()
+    res.status(200).json({
+      success: true,
+      message: "Password Reset Successfully",
+    });
+  }catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
 // exports.updatePassword = async (req, res) => {
 //   try {
 //     const user = await User.findById(req.user._id).select("+password");
