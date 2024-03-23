@@ -1,5 +1,5 @@
 const Freelancers = require("../models/freelancer");
-
+const { sendEmail } = require("../middlewares/sendEmail");
 exports.loginFreelancer = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -60,7 +60,7 @@ exports.logoutFreelancer = async (req, res) => {
 
 exports.registerFreelancer = async (req, res) => {
   try {
-    const { firstname, lastname, username, email, password ,pfp} = req.body;
+    const { firstname, lastname, username, email, password} = req.body;
     let freelancer = await Freelancers.findOne({ email });
     console.log(req.body);
     if (freelancer) {
@@ -76,7 +76,7 @@ exports.registerFreelancer = async (req, res) => {
       username,
       email,
       password,
-      pfp
+    
     //   avatar,
     //   bio,
       // avatar: {
@@ -150,7 +150,7 @@ exports.updateFreelancerProfile = async (req, res) => {
     }
 
     // Extract the fields you want to update from the request body
-    const { firstname, lastname, username, aboutme, skills, education, experience,pfp } = req.body;
+    const { firstname, lastname, username, aboutme, skills, education, experience, pfp } = req.body;
 
     // Update the freelancer's profile details
     if (firstname) freelancer.firstname = firstname;
@@ -190,6 +190,92 @@ exports.updateFreelancerProfile = async (req, res) => {
     });
   }
 };
+
+exports.forgetPassword = async (req,res)=>{
+  try {
+    const {email} = req.body;
+    const freelancer = await Freelancers.findOne({email});
+    if(!freelancer){
+      return res.status(400).json({
+        success: false,
+        message: "Freelancer with this email does not exists",
+      });
+    }
+    const resetToken = await freelancer.getResetPasswordCode();
+    await freelancer.save()
+    await sendEmail({
+      email: freelancer.email,
+      subject: "Reset Password",
+      message: `Use the following password verification code to change your password.This code is valid only for 10 mins. Your password reset code is: ${resetToken} If you have not requested this email then please ignore it`,
+
+    })
+    console.log(resetToken);
+    res.status(200).json({
+      success: true,
+      resetToken,
+      message: `Reset password verification code sent to ${email}`,
+    });
+  }   
+  catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+exports.resetPassword = async (req,res)=>{
+  try {
+    const {resetPasswordToken} = req.body;
+    // const resetPasswordToken = crypto
+    // .createHash("sha256")
+    // .update(req.params.token)
+    // .digest("hex");
+    console.log(resetPasswordToken)
+    const user = await Freelancers.findOne({
+      resetPasswordToken,
+      resetPasswordDate: { $gt: Date.now() },
+    });
+    console.log(user)
+  
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Reset password verification code is invalid or has been expired",
+      });
+    }
+    // user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordDate = undefined;
+    await user.save();
+    res.status(200).json({
+      success: true,
+      email:user.email, //user email to use for new password reset
+      message: "Password reset code verified successfully",
+    });
+  }catch(err){
+    console.log(err);
+    res.sendStatus(400);
+  }
+};
+exports.setNewPassword = async (req,res)=>{
+  try {
+    const {email,password} = req.body;
+    console.log(email)
+    console.log(password)
+    const freelancer = await Freelancers.findOne({ email });
+    freelancer.password = password
+    await freelancer.save()
+    res.status(200).json({
+      success: true,
+      message: "Password Reset Successfully",
+    });
+  }catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
 
 
 // exports.updatePassword = async (req, res) => {

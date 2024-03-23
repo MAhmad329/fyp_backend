@@ -20,12 +20,7 @@ var freelancerSchema = new mongoose.Schema({
     unique: [true, "Username already Exists"],
   },
 
-  pfp: {
-    type: String,
-  },
 
-
-  
   email: {
     type: String,
     required: [true, "Please enter an Email"],
@@ -39,7 +34,14 @@ var freelancerSchema = new mongoose.Schema({
     select: false, // Means when we'll Access user's data we'll get all user information except this (i.e Password)
   },
 
+  resetPasswordToken: String,
+  resetPasswordDate: Date,
+
   
+  pfp: {
+    type: String,
+  },
+
   aboutme: {
     type: String,
     
@@ -109,6 +111,18 @@ freelancerSchema.methods.getResetPasswordToken = function () {
   this.resetPasswordDate = Date.now() + 10 * 6 * 1000; // 10 mins
 
   return resetToken;
+};
+
+
+freelancerSchema.methods.getResetPasswordCode = function () {
+  let code = '';
+  for (let i = 0; i < 4; i++) {
+    code += Math.floor(Math.random() * 10); // Generate a random digit between 0 and 9
+  }
+  this.resetPasswordToken = code;
+  this.resetPasswordDate = Date.now() + 10 * 60 * 1000; // 10 mins
+
+  return code;
 };
 
 const Freelancer = mongoose.model('Freelancer', freelancerSchema);

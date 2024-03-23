@@ -5,6 +5,9 @@ const {
   logoutFreelancer,
   getFreelancerDetails,
   updateFreelancerProfile,
+  forgetPassword,
+  resetPassword,
+  setNewPassword
 //   getMyFreelancerProfile,
 //   updateFreelancerProfile,
 } = require("../controllers/freelancer");
@@ -23,6 +26,9 @@ router.route("/Freelancer/login").post(loginFreelancer);
 router.route("/Freelancer/logout").get(logoutFreelancer);
 router.route("/Freelancer/details").get(isAuthenticated, getFreelancerDetails);
 router.route("/Freelancer/updateprofile").put(isAuthenticated, updateFreelancerProfile);
+router.route("/Freelancer/forgetpassword").post(forgetPassword)
+router.route("/Freelancer/resetpassword").post(resetPassword)
+router.route("/Freelancer/setnewpassword").put(setNewPassword)
 
 // router
 //   .route("/Freelancer/updateprofile")
