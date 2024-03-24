@@ -148,7 +148,7 @@ exports.applyToProject = async (req, res) => {
     //const  freelancerId  = req.freelancer._id;
     //const  projectId  = req.params.id;
     //else jugaru without authentication
-    const freelancerId = req.body.freelancerID;
+    const freelancerId = req.body.freelancerId;
     const  projectId  = req.params.id;
 
     // Check if the freelancer has already applied to the project
@@ -158,6 +158,7 @@ exports.applyToProject = async (req, res) => {
     }
 
     if (project.freelancerApplicants.includes(freelancerId)) {
+      console.log(freelancerId);
       return res.status(400).json({ success: false, message: 'Freelancer already applied to the project.' });
     }
 
