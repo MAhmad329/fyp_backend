@@ -281,6 +281,31 @@ exports.setNewPassword = async (req,res)=>{
   }
 }
 
+exports.searchFreelancer = async (req, res) => {
+  try {
+    const { firstname } = req.body;
+    
+
+    if (!firstname) {
+      return res.status(400).json({
+        success: false,
+        message: "Freelancer name is required for search.",
+      });
+    }
+
+    const freelancer = await Freelancers.find({ firstname: { $regex: new RegExp(firstname, "i") } });
+
+    res.status(200).json({
+      success: true,
+      freelancer,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 // exports.updatePassword = async (req, res) => {
 //   try {
