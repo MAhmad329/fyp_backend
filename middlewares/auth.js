@@ -24,7 +24,7 @@ exports.isCompanyAuthenticated = async (req, res, next) => {
 };
 
 exports.isAuthenticated = async (req, res, next) => {
-  console.log(req)
+  //console.log(req)
 
   try {
     const { token } = req.cookies;
