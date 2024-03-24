@@ -148,7 +148,7 @@ exports.applyToProject = async (req, res) => {
     //const  freelancerId  = req.freelancer._id;
     //const  projectId  = req.params.id;
     //else jugaru without authentication
-    const freelancerId = req.body.freelancerId;
+    const freelancerId = req.body.freelancerID;
     const  projectId  = req.params.id;
 
     // Check if the freelancer has already applied to the project
@@ -158,7 +158,6 @@ exports.applyToProject = async (req, res) => {
     }
 
     if (project.freelancerApplicants.includes(freelancerId)) {
-      console.log(freelancerId);
       return res.status(400).json({ success: false, message: 'Freelancer already applied to the project.' });
     }
 
@@ -183,6 +182,41 @@ exports.applyToProject = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
+
+exports.cancelApplyToProject = async (req, res) => {
+  try {
+    const freelancerId = req.body.freelancerID;
+    const projectId = req.params.id;
+
+    // Check if the project exists
+    const project = await Projects.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Project not found' });
+    }
+
+    // Remove the freelancer's application from the project
+    await Projects.updateOne(
+      { _id: projectId },
+      { $pull: { freelancerApplicants: freelancerId } }
+    );
+
+    // Optionally, update the freelancer model by removing the applied project
+    const freelancer = await Freelancer.findById(freelancerId);
+    if (!freelancer) {
+      return res.status(400).json({ success: false, message: 'Freelancer not found' });
+    }
+    await Freelancer.updateOne(
+      { _id: freelancerId },
+      { $pull: { appliedProjects: projectId } }
+    );
+
+    res.status(200).json({ success: true, message: 'Application canceled successfully.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
 
 
 
