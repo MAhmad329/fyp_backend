@@ -99,7 +99,7 @@ exports.getFreelancerDetails = async (req, res) => {
   try {
     const freelancerId = req.freelancer._id; // Use the authenticated freelancer's ID
 
-    const freelancer = await Freelancers.findById(freelancerId);
+    const freelancer = await Freelancers.findById(freelancerId).populate("appliedProjects");
 
     if (!freelancer) {
       return res.status(404).json({
@@ -110,6 +110,7 @@ exports.getFreelancerDetails = async (req, res) => {
 
     // You can customize the response based on what details you want to send to the client
     const freelancerDetails = {
+      _id: freelancer._id,
       firstname: freelancer.firstname,
       lastname: freelancer.lastname,
       username: freelancer.username,
@@ -119,6 +120,7 @@ exports.getFreelancerDetails = async (req, res) => {
       education: freelancer.education,
       experience: freelancer.experience,
       pfp: freelancer.pfp,
+      appliedProjects: freelancer.appliedProjects,
       // Add other details as needed
     };
 
@@ -150,7 +152,7 @@ exports.updateFreelancerProfile = async (req, res) => {
     }
 
     // Extract the fields you want to update from the request body
-    const { firstname, lastname, username, aboutme, skills, education, experience, pfp } = req.body;
+    const { firstname, lastname, username, aboutme, skills, education, experience, pfp,appliedProjects } = req.body;
 
     // Update the freelancer's profile details
     if (firstname) freelancer.firstname = firstname;
@@ -161,6 +163,7 @@ exports.updateFreelancerProfile = async (req, res) => {
     if (education) freelancer.education = education;
     if (experience) freelancer.experience = experience;
     if (pfp) freelancer.pfp = pfp;
+    if (appliedProjects) freelancer.appliedProjects = appliedProjects;
 
     // Save the updated freelancer profile
     await freelancer.save();
@@ -174,7 +177,8 @@ exports.updateFreelancerProfile = async (req, res) => {
       skills: freelancer.skills,
       education: freelancer.education,
       experience: freelancer.experience,
-      pfp: freelancer.pfp
+      pfp: freelancer.pfp,
+      appliedProjects: freelancer.appliedProjects,
       // Add other details as needed
     };
 
