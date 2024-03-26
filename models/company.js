@@ -20,7 +20,11 @@ var companySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  
+
+  pfp: {
+    type: String,
+  },
+
   email: {
     type: String,
     required: [true, "Please enter an Email"],

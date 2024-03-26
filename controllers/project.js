@@ -1,6 +1,7 @@
 const Projects = require("../models/project");
 const Freelancer = require("../models/freelancer")
 const Companies = require("../models/company");
+const Team = require("../models/team");
 
 exports.createProject = async (req, res) => {
   try {
@@ -170,10 +171,64 @@ exports.applyToProject = async (req, res) => {
     if (!freelancer) {
       res.status(400).json({ success: false, message: 'Freelancer null' });
     }
-    else{
-      freelancer.appliedProjects.push(projectId);
-      await freelancer.save();
+    
+    freelancer.appliedProjects.push(projectId);
+    await freelancer.save();
+  
+
+
+    res.status(200).json({ success: true, message: 'Application successful.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
+exports.teamApplyToProject = async (req, res) => {
+  try {
+    //if authentication route
+    //const  freelancerId  = req.freelancer._id;
+    //const  projectId  = req.params.id;
+    //else jugaru without authentication
+    const freelancerId = req.freelancer._id;
+    const projectId = req.params.id;
+    const teamId = freelancer.teams._id;
+
+    const freelancer = await Freelancer.findById(freelancerId);
+    const team = await Team.findById(teamId);
+
+    if (!freelancer) {
+      return res.status(400).json({ success: false, message: 'Freelancer null' });
     }
+
+    if (!teamId) { 
+      return res.status(400).json({ success: false, message: 'Freelancer doesn\'t have a team'});
+    }
+
+  
+    const project = await Projects.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Project not found' });
+    }
+
+    if (project.teamApplicants.includes(teamId)) {
+      return res.status(400).json({ success: false, message: 'Team has already applied to the project.' });
+    }
+
+    if (team.owner != freelancerId) {
+      return res.status(400).json({ success: false, message: 'You are not the leader.' });
+    }
+
+    // Update the project with the freelancer's application
+    project.teamApplicants.push(teamId);
+    await project.save();
+
+    // Optionally, update the freelancer model with the applied project
+    
+    
+    team.projects.push(projectId);
+    await team.save();
+  
 
 
     res.status(200).json({ success: true, message: 'Application successful.' });
