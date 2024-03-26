@@ -148,7 +148,7 @@ exports.addMemberToTeam = async (req, res) => {
       return res.status(200).json({ success:true,freelancer,message: 'Fetched Team' });
     }
      catch (error) {
-      console.error('Error fetcjing team:', error);
+      console.error('Error fetching team:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
   };
