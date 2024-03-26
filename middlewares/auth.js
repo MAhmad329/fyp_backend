@@ -38,6 +38,7 @@ exports.isAuthenticated = async (req, res, next) => {
     const decoded = await jwt.verify(token, "creatingatestJWTkey");
 
     req.freelancer = await Freelancers.findById(decoded._id);
+    //console.log(req.freelancer)
 
     next();
   } catch (error) {
