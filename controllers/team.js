@@ -47,11 +47,12 @@ exports.addMemberToTeam = async (req, res) => {
         
         }
         else{
-            //Member has a team
+            //Member does not have a team
             if(!member.teams){
                 const newTeam = new Team({
                     name: `${freelancer.firstname}'s Team`,
                     members: [freelancerId,memberId],
+                    owner: freelancer
         
                 });
                 await newTeam.save();
@@ -104,6 +105,10 @@ exports.addMemberToTeam = async (req, res) => {
       // Check if the member exists in the team
       if (!team.members.includes(memberId)) {
         return res.status(404).json({ error: 'Member does not exist in the team' });
+      }
+
+      if (memberId==freelancerId){
+        return res.status(404).json({ error: 'You are the owner of this team' });
       }
   
       // Remove the member from the team

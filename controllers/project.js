@@ -192,12 +192,17 @@ exports.teamApplyToProject = async (req, res) => {
     //else jugaru without authentication
     const freelancerId = req.freelancer._id;
     const projectId = req.params.id;
-    const teamId = freelancer.teams._id;
+    const teamId = req.freelancer.teams._id;
 
-    const freelancer = await Freelancer.findById(freelancerId);
+    console.log(freelancerId)
+    //console.log(projectId)
+    //console.log(teamId)
+
+    //const freelancer = await Freelancer.findById(freelancerId);
     const team = await Team.findById(teamId);
+    console.log(team.owner.toString())
 
-    if (!freelancer) {
+    if (!req.freelancer) {
       return res.status(400).json({ success: false, message: 'Freelancer null' });
     }
 
@@ -215,7 +220,7 @@ exports.teamApplyToProject = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Team has already applied to the project.' });
     }
 
-    if (team.owner != freelancerId) {
+    if (team.owner.toString() !== freelancerId.toString()) {
       return res.status(400).json({ success: false, message: 'You are not the leader.' });
     }
 
