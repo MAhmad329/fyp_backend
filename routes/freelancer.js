@@ -32,6 +32,7 @@ router.route("/Freelancer/forgetpassword").post(forgetPassword)
 router.route("/Freelancer/resetpassword").post(resetPassword)
 router.route("/Freelancer/setnewpassword").put(setNewPassword)
 router.route("/Freelancer/addTeamMember").post(addMemberToTeam);
+
 //router.route("/Freelancer/addTeamMember").post(addMemberToTeam);
 
 // router
