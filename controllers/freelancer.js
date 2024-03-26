@@ -124,6 +124,8 @@ exports.getFreelancerDetails = async (req, res) => {
       // Add other details as needed
     };
 
+    console.log(freelancerDetails);
+
     res.status(200).json({
       success: true,
       freelancer: freelancerDetails,

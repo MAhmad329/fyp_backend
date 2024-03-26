@@ -16,11 +16,6 @@ var projectSchema = new mongoose.Schema({
     required: true,
     },
   
-  // technologystack: {
-  //   type: String,
-  //   required: true,
-  //   },
-
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Company",

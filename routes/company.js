@@ -10,7 +10,7 @@ const {
 //   updateCompanyProfile,
 } = require("../controllers/company");
 var router = express.Router();
-const { isAuthenticated } = require("../middlewares/auth");
+const { isCompanyAuthenticated } = require("../middlewares/auth");
 
 /* GET users listing. */
 router.get("/Company", function (req, res, next) {
@@ -23,6 +23,8 @@ router.route("/Company/logout").get(logoutCompany);
 router.route("/Company/forgetpassword").post(forgetPassword)
 router.route("/Company/resetpassword").post(resetPassword)
 router.route("/Company/setnewpassword").put(setNewPassword)
+router.route("/Company/details").get(isCompanyAuthenticated, getFreelancerDetails);
+router.route("/Company/updateprofile").put(isCompanyAuthenticated, updateFreelancerProfile);
 // router
 //   .route("/Company/updateprofile")
 //   .put(isAuthenticated, updateCompanyProfile);

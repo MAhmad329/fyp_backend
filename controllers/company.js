@@ -100,6 +100,98 @@ exports.registerCompany = async (req, res) => {
   }
 };
 
+exports.getCompanyDetails = async (req, res) => {
+  try {
+    const companyId = req.company._id; // Use the authenticated freelancer's ID
+
+    const company = await Companies.findById(companyId).populate("projects");
+
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: "Company not found",
+      });
+    }
+
+    // You can customize the response based on what details you want to send to the client
+    const companyDetails = {
+      _id: company._id,
+      companyname: company.companyname,
+      businessAddress: company.businessAddress,
+      name: company.name,
+      email: company.email,
+      projects: company.projects,
+      pfp: company.pfp,
+    };
+
+    console.log(companyDetails);
+
+    res.status(200).json({
+      success: true,
+      company: companyDetails,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+exports.updateCompanyProfile = async (req, res) => {
+  try {
+    const companyId = req.company._id; // Use the authenticated freelancer's ID
+
+    // Find the freelancer by ID
+    const company = await Companies.findById(companyId);
+
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: "Company not found",
+      });
+    }
+
+    // Extract the fields you want to update from the request body
+    const { companyname, businessAddress, name, email, pfp, projects } = req.body;
+
+    // Update the freelancer's profile details
+    if (companyname) company.companyname = companyname;
+    if (businessAddress) company.businessAddress = businessAddress;
+    if (name) company.name = name;
+    if (email) company.email = email;
+    if (pfp) company.pfp = pfp;
+    if (projects) company.projects = projects;
+    
+    // Save the updated freelancer profile
+    await company.save();
+
+    // You can customize the response based on what details you want to send to the client
+    const updatedCompanyDetails = {
+      companyname: company.companyname,
+      businessAddress: company.businessAddress,
+      name: company.name,
+      email: company.email,
+      pfp: company.pfp,
+      projects: company.projects,
+      // Add other details as needed
+    };
+
+    res.status(200).json({
+      success: true,
+      company: updatedCompanyDetails,
+      message: "Profile Updated",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
 
 exports.forgetPassword = async (req,res)=>{
   try {

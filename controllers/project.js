@@ -170,10 +170,10 @@ exports.applyToProject = async (req, res) => {
     if (!freelancer) {
       res.status(400).json({ success: false, message: 'Freelancer null' });
     }
-    else{
-      freelancer.appliedProjects.push(projectId);
-      await freelancer.save();
-    }
+    
+    freelancer.appliedProjects.push(projectId);
+    await freelancer.save();
+  
 
 
     res.status(200).json({ success: true, message: 'Application successful.' });
