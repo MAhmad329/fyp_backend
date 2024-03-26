@@ -15,11 +15,11 @@ var projectSchema = new mongoose.Schema({
     type: String,
     required: true,
     },
-      
-  technologystack: {
-    type: String,
-    required: true,
-    },
+  
+  // technologystack: {
+  //   type: String,
+  //   required: true,
+  //   },
 
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -62,8 +62,10 @@ var projectSchema = new mongoose.Schema({
     required: true,
   },
   
-  requiredMembers: [
-    
+  requiredMembers: [{
+    type: String,
+    required: true,
+  }
   ],
   
   createdAt: {
