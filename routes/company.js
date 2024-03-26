@@ -6,6 +6,8 @@ const {
   forgetPassword,
   resetPassword,
   setNewPassword,
+  getCompanyDetails,
+  updateCompanyProfile
 //   getMyCompanyProfile,
 //   updateCompanyProfile,
 } = require("../controllers/company");
@@ -23,8 +25,8 @@ router.route("/Company/logout").get(logoutCompany);
 router.route("/Company/forgetpassword").post(forgetPassword)
 router.route("/Company/resetpassword").post(resetPassword)
 router.route("/Company/setnewpassword").put(setNewPassword)
-router.route("/Company/details").get(isCompanyAuthenticated, getFreelancerDetails);
-router.route("/Company/updateprofile").put(isCompanyAuthenticated, updateFreelancerProfile);
+router.route("/Company/details").get(isCompanyAuthenticated, getCompanyDetails);
+router.route("/Company/updateprofile").put(isCompanyAuthenticated, updateCompanyProfile);
 // router
 //   .route("/Company/updateprofile")
 //   .put(isAuthenticated, updateCompanyProfile);

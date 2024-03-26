@@ -21,7 +21,7 @@ var companySchema = new mongoose.Schema({
     required: true,
   },
 
-   pfp: {
+  pfp: {
     type: String,
   },
 
