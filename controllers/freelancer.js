@@ -283,17 +283,17 @@ exports.setNewPassword = async (req,res)=>{
 
 exports.searchFreelancer = async (req, res) => {
   try {
-    const { firstname } = req.body;
+    const { username } = req.body;
     
 
-    if (!firstname) {
+    if (!username) {
       return res.status(400).json({
         success: false,
-        message: "Freelancer name is required for search.",
+        message: "Freelancer username is required for search.",
       });
     }
 
-    const freelancer = await Freelancers.find({ firstname: { $regex: new RegExp(firstname, "i") } });
+    const freelancer = await Freelancers.find({ username: { $regex: new RegExp(username, "i") } });
 
     res.status(200).json({
       success: true,

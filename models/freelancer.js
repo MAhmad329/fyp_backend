@@ -79,10 +79,10 @@ var freelancerSchema = new mongoose.Schema({
       ref: "Project",
     },
   ],
-  teams: [{
+  teams: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Team",
-  }],
+  },
   resetPasswordToken: String,
   resetPasswordDate: Date,
 });

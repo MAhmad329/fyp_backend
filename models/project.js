@@ -15,7 +15,7 @@ var projectSchema = new mongoose.Schema({
     type: String,
     required: true,
     },
-  
+      
   technologystack: {
     type: String,
     required: true,
