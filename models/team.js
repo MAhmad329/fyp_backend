@@ -9,6 +9,11 @@ const teamSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Freelancer",
   }],
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Freelancer",
+    required: true,
+  },
   projects: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Project",
