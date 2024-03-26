@@ -12,6 +12,8 @@ const {
 //   updateFreelancerProfile,
 } = require("../controllers/freelancer");
 const { addMemberToTeam } = require("../controllers/team");
+const { deleteMemberFromTeam } = require("../controllers/team");
+const { fetchteam } = require("../controllers/team");
 const { searchFreelancer } = require("../controllers/freelancer");
 
 var router = express.Router();
@@ -31,15 +33,9 @@ router.route("/Freelancer/updateprofile").put(isAuthenticated, updateFreelancerP
 router.route("/Freelancer/forgetpassword").post(forgetPassword)
 router.route("/Freelancer/resetpassword").post(resetPassword)
 router.route("/Freelancer/setnewpassword").put(setNewPassword)
-router.route("/Freelancer/addTeamMember").post(addMemberToTeam);
+router.route("/Freelancer/fetchteam").get(isAuthenticated,fetchteam)
+router.route("/Freelancer/addTeamMember").post(isAuthenticated, addMemberToTeam);
+router.route("/Freelancer/deleteMember").post(isAuthenticated, deleteMemberFromTeam);
 
-//router.route("/Freelancer/addTeamMember").post(addMemberToTeam);
-
-// router
-//   .route("/Freelancer/updateprofile")
-//   .put(isAuthenticated, updateFreelancerProfile);
-// router
-//   .route("/Freelancer/myprofile")
-//   .get(isAuthenticated, getMyFreelancerProfile);
 
 module.exports = router;
