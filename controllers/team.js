@@ -138,22 +138,29 @@ exports.addMemberToTeam = async (req, res) => {
   };
   
   
-  exports.fetchteam = async (req, res) => {
-
-    const freelancerId = req.freelancer._id; 
-    console.log(freelancerId)
-    try {
-      const freelancer = await Freelancer.findById(freelancerId).populate({
-        path: 'teams',
-        populate: {
-            path: 'members'
+ exports.fetchteam = async (req, res) => {
+  const freelancerId = req.freelancer._id;
+  console.log(freelancerId);
+  try {
+    const freelancer = await Freelancer.findById(freelancerId).populate({
+      path: 'teams',
+      populate: [
+        {
+          path: 'members'
+        },
+        {
+          path: 'owner'
+        },
+        {
+          path: 'projects'
         }
+      ]
     });
-      console.log(freelancer)
-      return res.status(200).json({ success:true,freelancer,message: 'Fetched Team' });
-    }
-     catch (error) {
-      console.error('Error fetching team:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  };
+    console.log(freelancer);
+    return res.status(200).json({ success: true, freelancer, message: 'Fetched Team' });
+  } catch (error) {
+    console.error('Error fetching team:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
