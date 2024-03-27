@@ -5,8 +5,8 @@ const Freelancer = require("../models/freelancer");
 // Method to add a task for a team member
 exports.addTaskToMember = async (req, res) => {
   try {
-      const { memberId, description, deadline } = req.body;
-      const teamId=req.params.teamId
+    const { memberId, description, deadline } = req.body;
+    const teamId=req.params.teamId
     const ownerId = req.freelancer._id; // Assuming the owner's ID is in req.freelancer after authentication
 
     // Find the team by ID

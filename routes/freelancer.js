@@ -37,7 +37,7 @@ router.route("/Freelancer/setnewpassword").put(setNewPassword)
 router.route("/Freelancer/fetchteam").get(isAuthenticated,fetchteam)
 router.route("/Freelancer/addTeamMember").post(isAuthenticated, addMemberToTeam);
 router.route("/Freelancer/deleteMember").post(isAuthenticated, deleteMemberFromTeam);
-router.post('/Freelancer/:teamId/addTask').post(isAuthenticated,addTaskToMember);
+router.route('/Freelancer/:teamId/addTask').post(isAuthenticated,addTaskToMember);
 
 
 module.exports = router;
