@@ -121,6 +121,7 @@ exports.getFreelancerDetails = async (req, res) => {
       experience: freelancer.experience,
       pfp: freelancer.pfp,
       appliedProjects: freelancer.appliedProjects,
+      teams: freelancer.teams
       // Add other details as needed
     };
 
