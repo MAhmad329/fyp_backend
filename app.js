@@ -3,7 +3,10 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
+var http = require('http');
 require("dotenv").config();
+
+
 
 const mongoose = require("mongoose");
 var cors = require("cors");
@@ -17,8 +20,66 @@ var projectRouter = require("./routes/project");
 var companyRouter = require("./routes/company");
 var firebaseRouter = require("./routes/firebase");
 var freelancerRouter = require("./routes/freelancer");
+var chatRouter = require("./routes/chat");
+const { Team } = require("./models/team")
 
 var app = express();
+var server = http.createServer(app); // Create an HTTP server
+var io = require('socket.io')(server); // Set up Socket.IO
+
+
+app.set('io', io);
+
+const activeUsers = new Map();
+
+io.on('connection', (socket) => {
+    console.log('A user connected');
+
+    socket.on('user online', ({ userId }) => {
+        activeUsers.set(userId, socket.id);
+        socket.userId = userId;
+    });
+
+    // When sending a message from the server, add a timestamp
+socket.on('individual chat message', async ({ senderId, receiverId, content }) => {
+  const receiverSocketId = activeUsers.get(receiverId);
+  if (receiverSocketId && receiverSocketId !== socket.id) {
+    const timestamp = new Date(); // Get current time
+    io.to(receiverSocketId).emit('individual chat message', { senderId, content, timestamp });
+  }
+});
+
+
+
+socket.on('team chat message', async ({ teamId, senderId, content }) => {
+    const team = await Team.findById(teamId);
+    if (team) {
+        team.members.forEach(memberId => {
+            const memberSocketId = activeUsers.get(memberId.toString());
+            if (memberSocketId) {
+                io.to(memberSocketId).emit('team chat message', { senderId, content });
+            }
+        });
+        const senderSocketId = activeUsers.get(senderId); // Get the sender's socket ID
+        if (senderSocketId) {
+            io.to(senderSocketId).emit('team chat message', { senderId, content }); // Emit back to the sender
+        }
+    }
+});
+
+
+    socket.on('join team chat', async ({ teamId }) => {
+        const team = await Team.findById(teamId);
+        if (team) {
+            socket.join(teamId);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        activeUsers.delete(socket.userId);
+        console.log('User disconnected');
+    });
+});
 
 
 
@@ -65,6 +126,8 @@ app.use("/api/v1", projectRouter);
 app.use("/api/v1", companyRouter);
 app.use("/api/v1", firebaseRouter);
 app.use("/api/v1", freelancerRouter);
+app.use("/api/v1", chatRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -82,4 +145,4 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-module.exports = app;
+module.exports = { app, server, io };
