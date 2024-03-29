@@ -84,6 +84,22 @@ exports.getAllProjects = async (req, res) => {
   }
 };
 
+exports.getProjectsRequiringTeam = async (req, res) => {
+  try {
+    const projects = await Projects.find({ requiresTeam: true });
+
+    res.status(200).json({
+      success: true,
+      projects,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 exports.searchProjects = async (req, res) => {
   try {
     const { title } = req.body;
