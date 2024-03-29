@@ -45,7 +45,8 @@ socket.on('individual chat message', async ({ senderId, receiverId, content }) =
   const receiverSocketId = activeUsers.get(receiverId);
   if (receiverSocketId && receiverSocketId !== socket.id) {
     const timestamp = new Date(); // Get current time
-    io.to(receiverSocketId).emit('individual chat message', { senderId, content, timestamp });
+    const isRead = false;
+    io.to(receiverSocketId).emit('individual chat message', { senderId, content, timestamp,isRead });
   }
 });
 

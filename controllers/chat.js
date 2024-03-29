@@ -48,6 +48,19 @@ exports.sendMessage = async (req, res) => {
 };
 
 
+exports.markMessagesAsRead = async (req, res) => {
+  try {
+    const { chatId } = req.body;
+    await Chat.updateMany(
+      { '_id': chatId, 'messages.isRead': false },
+      { '$set': { 'messages.$[].isRead': true } }  // Set isRead to true for all messages
+    );
+    res.status(200).json({ success: true, message: 'Messages marked as read' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 
 exports.getChatMessagesWithId = async (req, res) => {
   try {
