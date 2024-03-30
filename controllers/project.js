@@ -84,6 +84,23 @@ exports.getAllProjects = async (req, res) => {
   }
 };
 
+exports.getAllFreelancerProjects = async (req, res) => {
+  try {
+    const projects = await Projects.find({ requiresTeam: false });
+
+    res.status(200).json({
+      success: true,
+      projects,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
 exports.getProjectsRequiringTeam = async (req, res) => {
   try {
     const projects = await Projects.find({ requiresTeam: true });
@@ -99,6 +116,59 @@ exports.getProjectsRequiringTeam = async (req, res) => {
     });
   }
 };
+
+exports.getCompanyFreelancerProjects = async (req, res) => {
+  try {
+    const companyId = req.company.id;
+    const projects = await Projects.find({ owner: companyId, requiresTeam:false }).populate('owner', 'name');
+    res.status(200).json({
+      success: true,
+      count: projects.length,
+      data: projects
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error: ' + error.message
+    });
+  }
+};
+exports.getCompanyTeamProjects = async (req, res) => {
+  try {
+    const companyId = req.company.id;
+    const projects = await Projects.find({ owner: companyId, requiresTeam:true }).populate('owner', 'name');
+    res.status(200).json({
+      success: true,
+      count: projects.length,
+      data: projects
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error: ' + error.message
+    });
+  }
+};
+
+exports.getApplicants = async (req, res) => {
+  try {
+    const projectId = req.params.projectId;
+    const project = await Projects.findById(projectId)
+      .populate('freelancerApplicants')
+      .populate('teamApplicants');
+
+    if (!project) {
+      return res.status(404).send({ message: 'Project not found' });
+    }
+
+    const applicants = project.requiresTeam ? project.teamApplicants : project.freelancerApplicants;
+
+    res.status(200).send(applicants);
+  } catch (error) {
+    res.status(500).send({ message: 'Error retrieving applicants', error: error.message });
+  }
+};
+
 
 exports.searchProjects = async (req, res) => {
   try {
