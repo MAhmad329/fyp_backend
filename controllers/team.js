@@ -81,61 +81,59 @@ exports.addMemberToTeam = async (req, res) => {
 
   exports.deleteMemberFromTeam = async (req, res) => {
     try {
-      const memberId = req.body.memberID; // Assuming memberId is passed as a route parameter
-      const freelancerId = req.freelancer._id;
-  
-      // Find the freelancer by ID
-      const freelancer = await Freelancer.findById(freelancerId);
-      if (!freelancer) {
-        return res.status(404).json({ error: 'Freelancer not found' });
-      }
-  
-      // Check if the freelancer has a team
-      if (!freelancer.teams) {
-        return res.status(404).json({ error: 'Freelancer does not have a team' });
-      }
-  
-      // Find the team of the freelancer
-      const team = await Team.findById(freelancer.teams);
-      console.log(team)
-      if (!team) {
-        return res.status(404).json({ error: 'Team not found' });
-      }
-  
-      // Check if the member exists in the team
-      if (!team.members.includes(memberId)) {
-        return res.status(404).json({ error: 'Member does not exist in the team' });
-      }
+        const memberId = req.body.memberID; // Assuming memberId is passed in the body
+        const freelancerId = req.freelancer._id; // Assuming freelancerId is set in req.freelancer
 
-      if (memberId==freelancerId){
-        return res.status(404).json({ error: 'You are the owner of this team' });
-      }
-  
-      // Remove the member from the team
-      const index = team.members.indexOf(memberId);
+        // Find the freelancer by ID
+        const freelancer = await Freelancer.findById(freelancerId);
+        if (!freelancer) {
+            return res.status(404).json({ error: 'Freelancer not found' });
+        }
 
-      // If memberId is found in the array, remove it
+        // Check if the freelancer has a team
+        if (!freelancer.teams) {
+            return res.status(404).json({ error: 'Freelancer does not have a team' });
+        }
+
+        // Find the team of the freelancer
+        const team = await Team.findById(freelancer.teams);
+        if (!team) {
+            return res.status(404).json({ error: 'Team not found' });
+        }
+
+        // Check if the member is the owner
+        if (freelancerId === team.owner.toString()) {
+            return res.status(403).json({ error: 'You are the owner of the team. You cannot leave the team.' });
+        }
+
+        // Check if the member exists in the team
+        if (!team.members.includes(memberId)) {
+            return res.status(404).json({ error: 'Member does not exist in the team' });
+        }
+
+        // Remove the member from the team
+        const index = team.members.indexOf(memberId);
         if (index !== -1) {
-          team.members.splice(index, 1); // Remove 1 element starting from the index
-      }
-      // Save the team document
-      await team.save();
-  
-      // Update the member's teams field
-      const member = await Freelancer.findById(memberId);
-      if (!member) {
-        return res.status(404).json({ error: 'Member not found' });
-      }
-  
-      member.teams = null;
-      await member.save();
-  
-      res.status(200).json({ message: 'Member removed from team successfully' });
+            team.members.splice(index, 1); // Remove 1 element starting from the index
+        }
+        // Save the team document
+        await team.save();
+
+        // Update the member's teams field
+        const member = await Freelancer.findById(memberId);
+        if (!member) {
+            return res.status(404).json({ error: 'Member not found' });
+        }
+
+        member.teams = null;
+        await member.save();
+
+        res.status(200).json({ message: 'Member left the team successfully' });
     } catch (error) {
-      console.error('Error deleting member from team:', error);
-      res.status(500).json({ error: 'Internal server error' });
+        console.error('Error leaving team:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-  };
+};
   
   
  exports.fetchteam = async (req, res) => {
