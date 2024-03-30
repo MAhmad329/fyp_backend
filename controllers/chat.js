@@ -1,5 +1,5 @@
 const { Chat, Message } = require("../models/chat");
-
+const Freelancer = require("../models/freelancer");
 const Team = require("../models/team"); // Import the Team model
 
 exports.sendMessage = async (req, res) => {
@@ -47,6 +47,19 @@ exports.sendMessage = async (req, res) => {
   }
 };
 
+
+exports.markMessagesAsRead = async (req, res) => {
+  try {
+    const { chatId } = req.body;
+    await Chat.updateMany(
+      { '_id': chatId, 'messages.isRead': false },
+      { '$set': { 'messages.$[].isRead': true } }  // Set isRead to true for all messages
+    );
+    res.status(200).json({ success: true, message: 'Messages marked as read' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 
 exports.getChatMessagesWithId = async (req, res) => {
@@ -98,9 +111,21 @@ exports.getChatMessagesWithoutId = async (req, res) => {
 // Get freelancer chats
 exports.getFreelancerChats = async (req, res) => {
   try {
-    const { freelancerId } = req.params;
-    const chats = await Chat.find({ $or: [{ participants: freelancerId }, { team: freelancerId }] }).populate('participants team');
-    res.status(200).json({ success: true, chats });
+    const  freelancerId  = req.params.id; // Assuming the freelancer ID is passed as a URL parameter
+
+    // Check if the freelancer exists
+    const freelancer = await Freelancer.findById(freelancerId);
+    if (!freelancer) {
+      return res.status(404).json({ success: false, message: "Freelancer not found" });
+    }
+
+    // Find individual chats where the freelancer is a participant
+    const individualChats = await Chat.find({
+      type: "individual",
+      participants: { $in: [freelancerId] }
+    }).populate("participants");
+
+    res.status(200).json({ success: true, chats: individualChats });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
