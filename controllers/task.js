@@ -36,6 +36,7 @@ exports.addTaskToMember = async (req, res) => {
         const task = new Task({
             description,
             assignee: memberId,
+            owner: ownerId,
             deadline,
             team: teamId,
             project: projectId, // Include the project ID when creating the task
