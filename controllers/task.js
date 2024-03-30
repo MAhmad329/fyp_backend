@@ -6,8 +6,9 @@ const Freelancer = require("../models/freelancer");
 exports.addTaskToMember = async (req, res) => {
     try {
         console.log('Request body:', req.body);
-        const { memberId, description, deadline, projectId } = req.body; // Include projectId in the request body
-        const teamId = req.params.teamId;
+        const { memberId, description, deadline } = req.body; // Include projectId in the request body
+        const  projectId  = req.params.id;
+        const teamId = req.freelancer.teams;
         console.log('Team ID:', teamId);
 
         const ownerId = req.freelancer._id; // Assuming the owner's ID is in req.freelancer after authentication
@@ -43,7 +44,28 @@ exports.addTaskToMember = async (req, res) => {
 
         await task.save();
 
-        res.status(201).json({ message: 'Task added successfully', task });
+        res.status(201).json({success:true, message: 'Task added successfully', task });
+    } catch (error) {
+        console.error('Error adding task to member:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+exports.getAllTasks = async (req, res) => {
+    try {
+        const  projectId  = req.params.id;
+        const teamId = req.freelancer.teams;
+        console.log('Project ID:', projectId);
+        console.log('Team ID:', teamId);
+        // Fetch tasks that match projectId and teamId
+        const tasks = await Task.find({ project: projectId, team: teamId }).populate('assignee');
+
+        res.status(200).json({
+            success:true,
+            message: 'Tasks fetched successfully',
+            tasks });
+
+        
+
     } catch (error) {
         console.error('Error adding task to member:', error);
         res.status(500).json({ error: 'Internal server error' });

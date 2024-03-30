@@ -327,3 +327,47 @@ exports.getProjectDetails = async (req, res) => {
     });
   }
 };
+
+exports.getAppliedProjects = async (req, res) => {
+  try {
+    const freelancerId = req.freelancer._id;
+
+    const freelancer = await Freelancer.findById(freelancerId).populate('appliedProjects');
+    var type;
+        if (!freelancer) {
+            return res.status(404).json({
+              success: false,
+              message: 'Freelancer not found',
+            })
+        }
+
+        if (freelancer.teams) {
+            // If freelancer has a team, fetch projects of the team
+            const team = await Team.findById(freelancer.teams).populate('projects');
+            const projects = team.projects;
+            type="team"
+            return res.status(200).json({
+              success: true,
+              type,
+              message:"Fetched Team Projects Successfully",
+              projects,
+            });
+        } else {
+            // If freelancer doesn't have a team, return individual applied projects
+            const projects = freelancer.appliedProjects;
+            type="individual"
+            return res.status(200).json({
+              success: true,
+              type,
+              message:"Fetched Individual Projects Successfully",
+              projects,
+            });
+            
+        }
+
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+}

@@ -8,7 +8,8 @@ const {
   getProjectDetails,
   cancelApplyToProject,
   teamApplyToProject,
-  getProjectsRequiringTeam
+  getProjectsRequiringTeam,
+  getAppliedProjects
 } = require("../controllers/project");
 var router = express.Router();
 const { isCompanyAuthenticated, isAuthenticated } = require("../middlewares/auth");
@@ -23,5 +24,7 @@ router.route("/project/:id/applyToProjectAuthenticated").post(isAuthenticated, a
 router.route("/project/applyToProject/:id").post(isAuthenticated, applyToProject);
 router.route("/project/applyToProjectasTeam/:id").post(isAuthenticated, teamApplyToProject);
 router.route("/project/cancelApply/:id").put(isAuthenticated,cancelApplyToProject);
+router.route('/project/myAppliedProjects').get(isAuthenticated,getAppliedProjects);
+
 
 module.exports = router;
