@@ -21,7 +21,7 @@ var companyRouter = require("./routes/company");
 var firebaseRouter = require("./routes/firebase");
 var freelancerRouter = require("./routes/freelancer");
 var chatRouter = require("./routes/chat");
-const { Team } = require("./models/team")
+const  Team  = require("./models/team")
 
 var app = express();
 var server = http.createServer(app); // Create an HTTP server
@@ -41,39 +41,42 @@ io.on('connection', (socket) => {
     });
 
     // When sending a message from the server, add a timestamp
-socket.on('individual chat message', async ({ senderId, receiverId, content }) => {
+socket.on('individual chat message', async ({ sender, receiverId, content }) => {
   const receiverSocketId = activeUsers.get(receiverId);
   if (receiverSocketId && receiverSocketId !== socket.id) {
     const timestamp = new Date(); // Get current time
     const isRead = false;
-    io.to(receiverSocketId).emit('individual chat message', { senderId, content, timestamp,isRead });
+    io.to(receiverSocketId).emit('individual chat message', { sender, content, timestamp,isRead });
   }
 });
 
 
+// socket.on('team chat message', async ({ teamId, senderId, content }) => {
+//     const team = await Team.findById(teamId);
+//     if (team) {
+//         team.members.forEach(memberId => {
+//             const memberSocketId = activeUsers.get(memberId.toString());
+//             if (memberSocketId) {
+//                 io.to(memberSocketId).emit('team chat message', { senderId, content });
+//             }
+//         });
+//         const senderSocketId = activeUsers.get(senderId); // Get the sender's socket ID
+//         if (senderSocketId) {
+//             io.to(senderSocketId).emit('team chat message', { senderId, content }); // Emit back to the sender
+//         }
+//     }
+// });
+  
 
-socket.on('team chat message', async ({ teamId, senderId, content }) => {
-    const team = await Team.findById(teamId);
-    if (team) {
-        team.members.forEach(memberId => {
-            const memberSocketId = activeUsers.get(memberId.toString());
-            if (memberSocketId) {
-                io.to(memberSocketId).emit('team chat message', { senderId, content });
-            }
-        });
-        const senderSocketId = activeUsers.get(senderId); // Get the sender's socket ID
-        if (senderSocketId) {
-            io.to(senderSocketId).emit('team chat message', { senderId, content }); // Emit back to the sender
-        }
-    }
-});
+socket.on('team chat message', ({ teamId, sender, senderUsername, content }) => {
+        const timestamp = new Date();
+        const isRead = false;
+        io.to(teamId).emit('team chat message', { sender, senderUsername, content, timestamp, isRead });
+    });
 
-
-    socket.on('join team chat', async ({ teamId }) => {
-        const team = await Team.findById(teamId);
-        if (team) {
-            socket.join(teamId);
-        }
+    socket.on('join team chat', ({ teamId }) => {
+        socket.join(teamId);
+        console.log(`User ${socket.userId} joined team chat ${teamId}`);
     });
 
     socket.on('disconnect', () => {
