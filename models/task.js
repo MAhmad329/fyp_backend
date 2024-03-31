@@ -11,6 +11,14 @@ const taskSchema = new mongoose.Schema({
     ref: "Freelancer",
     required: true,
   },
+  owner:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Freelancer",
+   
+  },
+  submittedWork:{
+    type: String,
+  },
   deadline: {
     type: Date,
     required: true,
@@ -18,7 +26,7 @@ const taskSchema = new mongoose.Schema({
   status: {
     type: String,
     required: true,
-    enum: ['pending', 'in progress', 'completed', 'overdue'],
+    enum: ['pending', 'submitted', 'completed', 'overdue'],
     default: 'pending',
   },
   team: {

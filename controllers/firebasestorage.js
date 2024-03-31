@@ -46,6 +46,8 @@ exports.uploadFile = async (req, res) => {
       // Set metadata with the MIME type
       const metadata = {
         contentType: file.mimetype,
+        contentDisposition: 'attachment; filename="' + file.originalname + '"',
+
       };
       // Upload file with metadata
       const uploadTask = await uploadBytesResumable(storageRef, file.buffer, metadata);
