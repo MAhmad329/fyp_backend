@@ -60,7 +60,7 @@ exports.submitTaskWork = async (req, res) => {
         if(!workDone){
             return res.status(400).json({
                 success: false,
-                error: "Missing data"
+                message: "Missing data"
             });
         };
 
@@ -75,7 +75,7 @@ exports.submitTaskWork = async (req, res) => {
         if (!userId || !task.assignee.equals(userId)) {
             return res.status(403).json({
                 success: false,
-                error: "Forbidden"
+                message: "Forbidden"
             });
         }
 
@@ -96,6 +96,54 @@ exports.submitTaskWork = async (req, res) => {
         });
     } catch (error) {
         console.error('Error adding task to member:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+exports.saveTaskStatus = async (req, res) => {
+    try {
+        
+        const { taskId, status } = req.body;
+
+        //If no work done or notes are provided, return an error
+        if(!status || !taskId){
+            return res.status(400).json({
+                success: false,
+                message: "Missing data"
+            });
+        };
+
+        
+        //Get the logged user id
+        const userId = req.freelancer ? req.freelancer._id : null;
+
+        // Find the task with the given ID
+        const task = await Task.findById(taskId);
+
+        // Check if the user has permission to update the task
+        if (!userId || !task.owner.equals(userId)) {
+            return res.status(403).json({
+                success: false,
+                message: "Forbidden"
+            });
+        }
+
+        // Update the fields of the task
+        task.set({
+            
+            status: status,
+        }).markModified("setStatus"); // Mark modified because we only want to save this field
+
+        // Save the updated task in the database
+        await task.save();
+
+        // Send a response back to the client
+        res.status(201).json({
+            success: true,
+            message: "Status changed successfully",
+            task
+        });
+    } catch (error) {
+        console.error('Error changing status to task:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };

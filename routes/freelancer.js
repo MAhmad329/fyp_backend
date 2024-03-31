@@ -15,7 +15,7 @@ const { addMemberToTeam } = require("../controllers/team");
 const { deleteMemberFromTeam } = require("../controllers/team");
 const { fetchteam } = require("../controllers/team");
 const { searchFreelancer } = require("../controllers/freelancer");
-const { addTaskToMember, getAllTasks, submitTaskWork } = require("../controllers/task");
+const { addTaskToMember, getAllTasks, submitTaskWork, saveTaskStatus } = require("../controllers/task");
 
 var router = express.Router();
 const { isAuthenticated } = require("../middlewares/auth");
@@ -41,5 +41,6 @@ router.route('/Freelancer/:id/addTask').post(isAuthenticated,addTaskToMember);
 router.route('/Freelancer/:id/updateTask').put(isAuthenticated,addTaskToMember);
 router.route('/Freelancer/:id/getTasks').get(isAuthenticated,getAllTasks);
 router.route('/Freelancer/updateTask').put(isAuthenticated,submitTaskWork);
+router.route('/Freelancer/updateTaskStatus').put(isAuthenticated,saveTaskStatus);
 
 module.exports = router;
