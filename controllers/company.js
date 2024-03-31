@@ -2,6 +2,7 @@
 // const Post = require("../models/posts");
 const Companies = require("../models/company");
 const Project = require("../models/project");
+const Team = require("../models/team");
 const { sendEmail } = require("../middlewares/sendEmail");
 
 
@@ -55,7 +56,13 @@ exports.selectFreelancerOrTeam = async (req, res) => {
     }
 
     if (project.requiresTeam) {
+      const team = await Team.findById(selectedId); // Fetch the team from the database
+      if (!team) {
+        return res.status(404).json({ message: 'Team not found' });
+      }
       project.selectedTeam = selectedId;
+      team.assignedProjects.push(projectId);
+      await team.save(); // Save the updated team
     } else {
       project.selectedApplicant = selectedId;
     }

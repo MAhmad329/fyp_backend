@@ -441,3 +441,39 @@ exports.getAppliedProjects = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 }
+
+exports.getTeamAssignedProjects = async (req, res) => {
+  try {
+    const freelancerId = req.freelancer._id;
+
+    const freelancerteam = await Freelancer.findById(freelancerId).populate({
+      path: 'teams',
+      populate: { path: 'assignedProjects' }
+    });
+
+    // Get the first team
+    const team = freelancerteam.teams;
+
+    console.log('Team:', team);
+
+    // Check if the team has any assigned projects
+    if (!team || !team.assignedProjects || team.assignedProjects.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No assigned Projects',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Fetched Assigned Projects Successfully",
+      Projects: team.assignedProjects,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+}
+
+
