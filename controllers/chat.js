@@ -107,6 +107,32 @@ exports.getChatMessagesWithoutId = async (req, res) => {
   }
 };
 
+exports.getChatMessagesWithoutIdWeb = async (req, res) => {
+  try {
+    const { senderId, receiverId, teamId } = req.body;
+
+    let chat;
+    if (teamId) {
+      chat = await Chat.findOne({ team: teamId }).populate({
+        path:'messages',
+        populate:{path:'sender'}
+      });
+    } else {
+      chat = await Chat.findOne({
+        type: 'individual',
+        participants: { $all: [senderId, receiverId] }
+      }).populate('messages');
+    }
+
+    if (!chat) {
+      return res.status(404).json({ success: false, message: 'Chat not found' });
+    }
+
+    res.status(200).json({ success: true, messages: chat.messages });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 // Get freelancer chats
 exports.getFreelancerChats = async (req, res) => {
