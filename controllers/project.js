@@ -165,36 +165,49 @@ exports.getApplicants = async (req, res) => {
       return res.status(404).send({ message: 'Project not found' });
     }
 
-    const applicants = project.requiresTeam ? project.teamApplicants : project.freelancerApplicants;
-
-    // Initialize an array to store the total skills of all team members
-    let totalSkills = [];
+    let applicants = project.requiresTeam ? project.teamApplicants : project.freelancerApplicants;
 
     if (project.requiresTeam) {
+      // Create a new array to hold team applicants with their skills
+      let teamApplicantsWithSkills = [];
+
       // Loop through each team applicant
       applicants.forEach(teamApplicant => {
+        // Initialize an array to store the skills of this team's members
+        let teamSkills = [];
+
         // Loop through each member of the team
         teamApplicant.members.forEach(member => {
-          // Concatenate the member's skills to the totalSkills array
-          totalSkills = totalSkills.concat(member.skills);
+          // Concatenate the member's skills to the teamSkills array
+          teamSkills = teamSkills.concat(member.skills);
+        });
+
+        // Remove duplicates from the teamSkills array
+        teamSkills = [...new Set(teamSkills)];
+
+        // Add the team applicant with its skills to the new array
+        teamApplicantsWithSkills.push({
+          teamApplicant: teamApplicant,
+          skills: teamSkills
         });
       });
 
-      // Remove duplicates from the totalSkills array
-      totalSkills = [...new Set(totalSkills)];
+      // Update the applicants array to include skills
+      applicants = teamApplicantsWithSkills;
     }
 
     res.status(200).json({
       success: true,
-      totalSkills: totalSkills,
       project: project,
       count: applicants.length,
-      applicants: applicants,
+      applicants: applicants
     });
   } catch (error) {
     res.status(500).send({ message: 'Error retrieving applicants', error: error.message });
   }
 };
+
+
 
 
 
