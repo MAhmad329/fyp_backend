@@ -49,6 +49,7 @@ exports.selectFreelancerOrTeam = async (req, res) => {
   try {
     const { projectId } = req.params;
     const { selectedId } = req.body;
+    console.log(projectId, selectedId);
 
     const project = await Project.findById(projectId);
 
@@ -58,12 +59,14 @@ exports.selectFreelancerOrTeam = async (req, res) => {
 
     // Check if the project has already been selected
     if (project.selectedTeam || project.selectedApplicant) {
+      console.log('Project has already been selected');
       return res.status(400).json({ message: 'Project has already been selected' });
     }
 
     if (project.requiresTeam) {
       const team = await Team.findById(selectedId); // Fetch the team from the database
       if (!team) {
+        console.log('Team not found');
         return res.status(404).json({ message: 'Team not found' });
       }
       project.selectedTeam = selectedId;
@@ -78,7 +81,7 @@ exports.selectFreelancerOrTeam = async (req, res) => {
 
     await project.save();
 
-    res.status(200).json({ message: 'Selection updated successfully', project });
+    res.status(200).json({success:true, message: 'Selection updated successfully', project });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

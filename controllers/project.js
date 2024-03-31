@@ -167,7 +167,12 @@ exports.getApplicants = async (req, res) => {
 
     const applicants = project.requiresTeam ? project.teamApplicants : project.freelancerApplicants;
 
-    res.status(200).send(applicants);
+    res.status(200).json({
+      success: true,
+      project:project,
+      count:applicants.length,
+      applicants:applicants,
+    });
   } catch (error) {
     res.status(500).send({ message: 'Error retrieving applicants', error: error.message });
   }
