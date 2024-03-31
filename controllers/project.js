@@ -156,7 +156,10 @@ exports.getApplicants = async (req, res) => {
     const projectId = req.params.projectId;
     const project = await Projects.findById(projectId)
       .populate('freelancerApplicants')
-      .populate('teamApplicants');
+      .populate({
+        path: 'teamApplicants',
+        populate: { path: 'members' }  // Populating the members array within teamApplicants
+      });
 
     if (!project) {
       return res.status(404).send({ message: 'Project not found' });
@@ -169,6 +172,7 @@ exports.getApplicants = async (req, res) => {
     res.status(500).send({ message: 'Error retrieving applicants', error: error.message });
   }
 };
+
 
 
 exports.searchProjects = async (req, res) => {

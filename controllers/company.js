@@ -85,6 +85,43 @@ exports.selectFreelancerOrTeam = async (req, res) => {
   }
 };
 
+exports.getProjectSelection = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    let result = {};
+    if (project.requiresTeam) {
+      await project.populate({
+        path: 'selectedTeam',
+        populate: { path: 'members' } // Populate the members array within the selectedTeam
+      });
+      result = {
+        projectId: project._id,
+        title: project.title,
+        selectedTeam: project.selectedTeam
+      };
+    } else {
+      await project.populate('selectedApplicant');
+      result = {
+        projectId: project._id,
+        title: project.title,
+        selectedApplicant: project.selectedApplicant
+      };
+    }
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err });
+  }
+};
+
+
+
 
 exports.logoutCompany = async (req, res) => {
   try {

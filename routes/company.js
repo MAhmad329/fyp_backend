@@ -8,7 +8,8 @@ const {
   setNewPassword,
   getCompanyDetails,
   updateCompanyProfile,
-  selectFreelancerOrTeam
+  selectFreelancerOrTeam,
+  getProjectSelection
 //   getMyCompanyProfile,
 //   updateCompanyProfile,
 } = require("../controllers/company");
@@ -28,7 +29,9 @@ router.route("/Company/resetpassword").post(resetPassword)
 router.route("/Company/setnewpassword").put(setNewPassword)
 router.route("/Company/details").get(isCompanyAuthenticated, getCompanyDetails);
 router.route("/Company/updateprofile").put(isCompanyAuthenticated, updateCompanyProfile);
-router.route('/Company/select/:projectId').patch(selectFreelancerOrTeam)
+router.route('/Company/select/:projectId').patch(selectFreelancerOrTeam);
+router.route('/Company/project/:projectId').get(getProjectSelection);
+
 // router
 //   .route("/Company/updateprofile")
 //   .put(isAuthenticated, updateCompanyProfile);
