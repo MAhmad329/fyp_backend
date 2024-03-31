@@ -18,6 +18,10 @@ const teamSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Project",
   }],
+  assignedProjects: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Project",
+  }],
 });
 
 const Team = mongoose.model('Team', teamSchema);
