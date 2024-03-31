@@ -56,6 +56,11 @@ exports.selectFreelancerOrTeam = async (req, res) => {
       return res.status(404).json({ message: 'Project not found' });
     }
 
+    // Check if the project has already been selected
+    if (project.selectedTeam || project.selectedApplicant) {
+      return res.status(400).json({ message: 'Project has already been selected' });
+    }
+
     if (project.requiresTeam) {
       const team = await Team.findById(selectedId); // Fetch the team from the database
       if (!team) {
@@ -78,8 +83,8 @@ exports.selectFreelancerOrTeam = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
-
 };
+
 
 exports.logoutCompany = async (req, res) => {
   try {
