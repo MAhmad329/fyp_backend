@@ -35,7 +35,7 @@ router.route('/project/myAppliedProjects').get(isAuthenticated,getAppliedProject
 router.route('/Project/getmyTeamprojects').get(isCompanyAuthenticated, getCompanyTeamProjects);
 router.route('/Project/getmyFreelancerprojects').get(isCompanyAuthenticated, getCompanyFreelancerProjects);
 
-router.route('/Project/:projectId/applicants').get(getApplicants);
+router.route('/Project/:projectId/applicants').get(getApplicants); // get applied freelancers or teams for a project
 
 router.route('/project/myTeamAssignedProjects').get(isAuthenticated,getTeamAssignedProjects);
 router.route('/project/mySoloAssignedProjects').get(isAuthenticated,getSoloAssignedProjects);

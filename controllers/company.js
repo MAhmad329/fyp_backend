@@ -98,16 +98,33 @@ exports.getProjectSelection = async (req, res) => {
     }
 
     let result = {};
+    let teamSkills = [];
     if (project.requiresTeam) {
       await project.populate({
         path: 'selectedTeam',
         populate: { path: 'members' } // Populate the members array within the selectedTeam
       });
+      //console.log(project.selectedTeam);
+
+      
+        // Loop through each member of the team
+        project.selectedTeam.members.forEach(member => {
+          // Concatenate the member's skills to the teamSkills array
+          teamSkills = teamSkills.concat(member.skills);
+        });
+
+        // Remove duplicates from the teamSkills array
+        teamSkills = [...new Set(teamSkills)];
+
+        
+      
       result = {
         projectId: project._id,
         title: project.title,
-        selectedTeam: project.selectedTeam
+        selectedTeam: project.selectedTeam,
+        teamSkills
       };
+      //console.log(result)
     } else {
       await project.populate('selectedApplicant');
       result = {
@@ -117,7 +134,10 @@ exports.getProjectSelection = async (req, res) => {
       };
     }
 
-    res.json(result);
+    res.json({
+      success:true,
+      result
+    });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err });
   }
