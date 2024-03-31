@@ -6,8 +6,9 @@ const Freelancer = require("../models/freelancer");
 exports.addTaskToMember = async (req, res) => {
     try {
         console.log('Request body:', req.body);
-        const { memberId, description, deadline, projectId } = req.body; // Include projectId in the request body
-        const teamId = req.params.teamId;
+        const { memberId, description, deadline } = req.body; // Include projectId in the request body
+        const  projectId  = req.params.id;
+        const teamId = req.freelancer.teams;
         console.log('Team ID:', teamId);
 
         const ownerId = req.freelancer._id; // Assuming the owner's ID is in req.freelancer after authentication
@@ -35,6 +36,7 @@ exports.addTaskToMember = async (req, res) => {
         const task = new Task({
             description,
             assignee: memberId,
+            owner: ownerId,
             deadline,
             team: teamId,
             project: projectId, // Include the project ID when creating the task
@@ -43,7 +45,77 @@ exports.addTaskToMember = async (req, res) => {
 
         await task.save();
 
-        res.status(201).json({ message: 'Task added successfully', task });
+        res.status(201).json({success:true, message: 'Task added successfully', task });
+    } catch (error) {
+        console.error('Error adding task to member:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+exports.submitTaskWork = async (req, res) => {
+    try {
+        
+        const { taskId, workDone } = req.body;
+
+        //If no work done or notes are provided, return an error
+        if(!workDone){
+            return res.status(400).json({
+                success: false,
+                error: "Missing data"
+            });
+        };
+
+        
+        //Get the logged user id
+        const userId = req.freelancer ? req.freelancer._id : null;
+
+        // Find the task with the given ID
+        const task = await Task.findById(taskId);
+
+        // Check if the user has permission to update the task
+        if (!userId || !task.assignee.equals(userId)) {
+            return res.status(403).json({
+                success: false,
+                error: "Forbidden"
+            });
+        }
+
+        // Update the fields of the task
+        task.set({
+            submittedWork: workDone,
+            status: "submitted",
+        }).markModified("submittedWork"); // Mark modified because we only want to save this field
+
+        // Save the updated task in the database
+        await task.save();
+
+        // Send a response back to the client
+        res.status(201).json({
+            success: true,
+            message: "Work submitted successfully",
+            task
+        });
+    } catch (error) {
+        console.error('Error adding task to member:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+      
+exports.getAllTasks = async (req, res) => {
+    try {
+        const  projectId  = req.params.id;
+        const teamId = req.freelancer.teams;
+        console.log('Project ID:', projectId);
+        console.log('Team ID:', teamId);
+        // Fetch tasks that match projectId and teamId
+        const tasks = await Task.find({ project: projectId, team: teamId }).populate('assignee');
+
+        res.status(200).json({
+            success:true,
+            message: 'Tasks fetched successfully',
+            tasks });
+
+        
+
     } catch (error) {
         console.error('Error adding task to member:', error);
         res.status(500).json({ error: 'Internal server error' });

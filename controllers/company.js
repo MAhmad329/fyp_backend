@@ -1,7 +1,11 @@
 // const User = require("../models/user");
 // const Post = require("../models/posts");
 const Companies = require("../models/company");
+const Project = require("../models/project");
+const Team = require("../models/team");
 const { sendEmail } = require("../middlewares/sendEmail");
+
+
 exports.loginCompany = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -38,6 +42,39 @@ exports.loginCompany = async (req, res) => {
       message: error.message,
     });
   }
+};
+
+exports.selectFreelancerOrTeam = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { selectedId } = req.body;
+
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    if (project.requiresTeam) {
+      const team = await Team.findById(selectedId); // Fetch the team from the database
+      if (!team) {
+        return res.status(404).json({ message: 'Team not found' });
+      }
+      project.selectedTeam = selectedId;
+      team.assignedProjects.push(projectId);
+      await team.save(); // Save the updated team
+    } else {
+      project.selectedApplicant = selectedId;
+    }
+
+    await project.save();
+
+    res.status(200).json({ message: 'Selection updated successfully', project });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+
 };
 
 exports.logoutCompany = async (req, res) => {

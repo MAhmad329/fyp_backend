@@ -25,7 +25,15 @@ const  Team  = require("./models/team")
 
 var app = express();
 var server = http.createServer(app); // Create an HTTP server
-var io = require('socket.io')(server); // Set up Socket.IO
+var io = require('socket.io')(server, {
+  cors: {
+    origin: 'http://localhost:3001',
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});// Set up Socket.IO
+
+app.set('io', io);
 
 
 app.set('io', io);

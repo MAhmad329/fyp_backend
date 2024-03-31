@@ -84,6 +84,22 @@ exports.getAllProjects = async (req, res) => {
   }
 };
 
+exports.getAllFreelancerProjects = async (req, res) => {
+  try {
+    const projects = await Projects.find({ requiresTeam: false });
+
+    res.status(200).json({
+      success: true,
+      projects,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 
 exports.getProjectsRequiringTeam = async (req, res) => {
   try {
@@ -100,6 +116,59 @@ exports.getProjectsRequiringTeam = async (req, res) => {
     });
   }
 };
+
+exports.getCompanyFreelancerProjects = async (req, res) => {
+  try {
+    const companyId = req.company.id;
+    const projects = await Projects.find({ owner: companyId, requiresTeam:false }).populate('owner', 'name');
+    res.status(200).json({
+      success: true,
+      count: projects.length,
+      data: projects
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error: ' + error.message
+    });
+  }
+};
+exports.getCompanyTeamProjects = async (req, res) => {
+  try {
+    const companyId = req.company.id;
+    const projects = await Projects.find({ owner: companyId, requiresTeam:true }).populate('owner', 'name');
+    res.status(200).json({
+      success: true,
+      count: projects.length,
+      data: projects
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error: ' + error.message
+    });
+  }
+};
+
+exports.getApplicants = async (req, res) => {
+  try {
+    const projectId = req.params.projectId;
+    const project = await Projects.findById(projectId)
+      .populate('freelancerApplicants')
+      .populate('teamApplicants');
+
+    if (!project) {
+      return res.status(404).send({ message: 'Project not found' });
+    }
+
+    const applicants = project.requiresTeam ? project.teamApplicants : project.freelancerApplicants;
+
+    res.status(200).send(applicants);
+  } catch (error) {
+    res.status(500).send({ message: 'Error retrieving applicants', error: error.message });
+  }
+};
+
 
 exports.searchProjects = async (req, res) => {
   try {
@@ -328,3 +397,83 @@ exports.getProjectDetails = async (req, res) => {
     });
   }
 };
+
+exports.getAppliedProjects = async (req, res) => {
+  try {
+    const freelancerId = req.freelancer._id;
+
+    const freelancer = await Freelancer.findById(freelancerId).populate('appliedProjects');
+    var type;
+        if (!freelancer) {
+            return res.status(404).json({
+              success: false,
+              message: 'Freelancer not found',
+            })
+        }
+
+        if (freelancer.teams) {
+            // If freelancer has a team, fetch projects of the team
+            const team = await Team.findById(freelancer.teams).populate('projects');
+            const projects = team.projects;
+            type="team"
+            return res.status(200).json({
+              success: true,
+              type,
+              message:"Fetched Team Projects Successfully",
+              projects,
+            });
+        } else {
+            // If freelancer doesn't have a team, return individual applied projects
+            const projects = freelancer.appliedProjects;
+            type="individual"
+            return res.status(200).json({
+              success: true,
+              type,
+              message:"Fetched Individual Projects Successfully",
+              projects,
+            });
+            
+        }
+
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+}
+
+exports.getTeamAssignedProjects = async (req, res) => {
+  try {
+    const freelancerId = req.freelancer._id;
+
+    const freelancerteam = await Freelancer.findById(freelancerId).populate({
+      path: 'teams',
+      populate: { path: 'assignedProjects' }
+    });
+
+    // Get the first team
+    const team = freelancerteam.teams;
+
+    console.log('Team:', team);
+
+    // Check if the team has any assigned projects
+    if (!team || !team.assignedProjects || team.assignedProjects.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No assigned Projects',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Fetched Assigned Projects Successfully",
+      Projects: team.assignedProjects,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+}
+
+
