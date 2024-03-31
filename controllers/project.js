@@ -158,7 +158,7 @@ exports.getApplicants = async (req, res) => {
       .populate('freelancerApplicants')
       .populate({
         path: 'teamApplicants',
-        populate: { path: 'members' }  // Populating the members array within teamApplicants
+        populate: { path: 'members' }
       });
 
     if (!project) {
@@ -167,16 +167,35 @@ exports.getApplicants = async (req, res) => {
 
     const applicants = project.requiresTeam ? project.teamApplicants : project.freelancerApplicants;
 
+    // Initialize an array to store the total skills of all team members
+    let totalSkills = [];
+
+    if (project.requiresTeam) {
+      // Loop through each team applicant
+      applicants.forEach(teamApplicant => {
+        // Loop through each member of the team
+        teamApplicant.members.forEach(member => {
+          // Concatenate the member's skills to the totalSkills array
+          totalSkills = totalSkills.concat(member.skills);
+        });
+      });
+
+      // Remove duplicates from the totalSkills array
+      totalSkills = [...new Set(totalSkills)];
+    }
+
     res.status(200).json({
       success: true,
-      project:project,
-      count:applicants.length,
-      applicants:applicants,
+      totalSkills: totalSkills,
+      project: project,
+      count: applicants.length,
+      applicants: applicants,
     });
   } catch (error) {
     res.status(500).send({ message: 'Error retrieving applicants', error: error.message });
   }
 };
+
 
 
 
