@@ -70,7 +70,7 @@ exports.deleteProject = async (req, res) => {
 
 exports.getAllProjects = async (req, res) => {
   try {
-    const projects = await Projects.find();
+    const projects = await Projects.find().populate('owner');
 
     res.status(200).json({
       success: true,
@@ -83,6 +83,7 @@ exports.getAllProjects = async (req, res) => {
     });
   }
 };
+
 
 exports.getProjectsRequiringTeam = async (req, res) => {
   try {
