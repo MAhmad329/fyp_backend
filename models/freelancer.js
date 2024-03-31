@@ -83,6 +83,11 @@ var freelancerSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Team",
   },
+  ongoingProjects: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
+    }
+  ],
   resetPasswordToken: String,
   resetPasswordDate: Date,
 });

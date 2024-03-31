@@ -4,6 +4,7 @@ const Companies = require("../models/company");
 const Project = require("../models/project");
 const Team = require("../models/team");
 const { sendEmail } = require("../middlewares/sendEmail");
+const Freelancer = require("../models/freelancer");
 
 
 exports.loginCompany = async (req, res) => {
@@ -64,7 +65,10 @@ exports.selectFreelancerOrTeam = async (req, res) => {
       team.assignedProjects.push(projectId);
       await team.save(); // Save the updated team
     } else {
+      const freelancerr = await Freelancer.findById(selectedId);
       project.selectedApplicant = selectedId;
+      freelancerr.ongoingProjects.push(projectId);
+      await freelancerr.save(); 
     }
 
     await project.save();

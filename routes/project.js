@@ -14,7 +14,8 @@ const {
   getCompanyFreelancerProjects,
   getApplicants,
   getAllFreelancerProjects,
-  getTeamAssignedProjects
+  getTeamAssignedProjects,
+  getSoloAssignedProjects
 } = require("../controllers/project");
 var router = express.Router();
 const { isCompanyAuthenticated, isAuthenticated } = require("../middlewares/auth");
@@ -35,6 +36,8 @@ router.route('/Project/getmyTeamprojects').get(isCompanyAuthenticated, getCompan
 router.route('/Project/getmyFreelancerprojects').get(isCompanyAuthenticated, getCompanyFreelancerProjects);
 router.route('/Project/:projectId/applicants').get(getApplicants);
 router.route('/project/myTeamAssignedProjects').get(isAuthenticated,getTeamAssignedProjects);
+router.route('/project/mySoloAssignedProjects').get(isAuthenticated,getSoloAssignedProjects);
+
 
 
 

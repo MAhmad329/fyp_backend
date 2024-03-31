@@ -476,4 +476,31 @@ exports.getTeamAssignedProjects = async (req, res) => {
   }
 }
 
+exports.getSoloAssignedProjects = async (req, res) => {
+  try {
+    const freelancerId = req.freelancer._id;
+
+    // Fetch the freelancer along with their ongoing projects
+    const freelancer = await Freelancer.findById(freelancerId).populate('ongoingProjects');
+
+    // Check if the freelancer has any ongoing projects
+    if (!freelancer.ongoingProjects || freelancer.ongoingProjects.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No ongoing Projects',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Fetched Ongoing Projects Successfully",
+      Projects: freelancer.ongoingProjects,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
 
