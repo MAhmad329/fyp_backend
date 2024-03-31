@@ -99,7 +99,11 @@ exports.getFreelancerDetails = async (req, res) => {
   try {
     const freelancerId = req.freelancer._id; // Use the authenticated freelancer's ID
 
-    const freelancer = await Freelancers.findById(freelancerId).populate("appliedProjects");
+    const freelancer = await Freelancers.findById(freelancerId)
+      .populate({
+        path: "appliedProjects",
+        populate: { path: "owner" } // Populate the owner field of each applied project
+      });
 
     if (!freelancer) {
       return res.status(404).json({

@@ -86,10 +86,7 @@ exports.getChatMessagesWithoutId = async (req, res) => {
 
     let chat;
     if (teamId) {
-      chat = await Chat.findOne({ team: teamId }).populate({
-        path:'messages',
-        populate:{path:'sender'}
-      });
+      chat = await Chat.findOne({ team: teamId }).populate('messages');
     } else {
       chat = await Chat.findOne({
         type: 'individual',

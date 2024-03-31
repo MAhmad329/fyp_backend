@@ -136,6 +136,7 @@ exports.getCompanyFreelancerProjects = async (req, res) => {
 exports.getCompanyTeamProjects = async (req, res) => {
   try {
     const companyId = req.company.id;
+    console.log(companyId)
     const projects = await Projects.find({ owner: companyId, requiresTeam:true }).populate('owner', 'name');
     res.status(200).json({
       success: true,
@@ -235,16 +236,18 @@ exports.applyToProject = async (req, res) => {
     //const  freelancerId  = req.freelancer._id;
     //const  projectId  = req.params.id;
     //else jugaru without authentication
-    const freelancerId = req.body.freelancerID;
+    const freelancerId = req.freelancer._id;
     const  projectId  = req.params.id;
 
     // Check if the freelancer has already applied to the project
     const project = await Projects.findById(projectId);
     if (!project) {
+      console.log('Project not found');
       return res.status(404).json({ success: false, message: 'Project not found' });
     }
 
     if (project.freelancerApplicants.includes(freelancerId)) {
+      console.log('Freelancer already applied to the project');
       return res.status(400).json({ success: false, message: 'Freelancer already applied to the project.' });
     }
 
@@ -255,6 +258,7 @@ exports.applyToProject = async (req, res) => {
     // Optionally, update the freelancer model with the applied project
     const freelancer = await Freelancer.findById(freelancerId);
     if (!freelancer) {
+      console.log('Freelancer not found');
       res.status(400).json({ success: false, message: 'Freelancer null' });
     }
     
@@ -289,10 +293,12 @@ exports.teamApplyToProject = async (req, res) => {
     console.log(team.owner.toString())
 
     if (!req.freelancer) {
+      console.log('Freelancer null');
       return res.status(400).json({ success: false, message: 'Freelancer null' });
     }
 
     if (!teamId) { 
+      console.log('Team null');
       return res.status(400).json({ success: false, message: 'Freelancer doesn\'t have a team'});
     }
 
@@ -303,10 +309,12 @@ exports.teamApplyToProject = async (req, res) => {
     }
 
     if (project.teamApplicants.includes(teamId)) {
+      console.log('Already applied');
       return res.status(400).json({ success: false, message: 'Team has already applied to the project.' });
     }
 
     if (team.owner.toString() !== freelancerId.toString()) {
+      console.log('You are not the leader');
       return res.status(400).json({ success: false, message: 'You are not the leader.' });
     }
 
@@ -331,7 +339,7 @@ exports.teamApplyToProject = async (req, res) => {
 
 exports.cancelApplyToProject = async (req, res) => {
   try {
-    const freelancerId = req.body.freelancerID;
+    const freelancerId = req.freelancer._id;
     const projectId = req.params.id;
 
     // Check if the project exists
@@ -340,21 +348,36 @@ exports.cancelApplyToProject = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Project not found' });
     }
 
-    // Remove the freelancer's application from the project
-    await Projects.updateOne(
-      { _id: projectId },
-      { $pull: { freelancerApplicants: freelancerId } }
-    );
+    // Check if the project requires a team
+    if (project.requiresTeam) {
+      // Get the freelancer's team
+      const freelancer = await Freelancer.findById(freelancerId).populate('teams');
+      if (!freelancer || !freelancer.teams) {
+        return res.status(400).json({ success: false, message: 'Freelancer or team not found' });
+      }
 
-    // Optionally, update the freelancer model by removing the applied project
-    const freelancer = await Freelancer.findById(freelancerId);
-    if (!freelancer) {
-      return res.status(400).json({ success: false, message: 'Freelancer not found' });
+      // Remove the team's application from the project
+      await Projects.updateOne(
+        { _id: projectId },
+        { $pull: { teamApplicants: freelancer.teams._id } }
+      );
+    } else {
+      // Remove the freelancer's application from the project
+      await Projects.updateOne(
+        { _id: projectId },
+        { $pull: { freelancerApplicants: freelancerId } }
+      );
+
+      // Optionally, update the freelancer model by removing the applied project
+      const freelancer = await Freelancer.findById(freelancerId);
+      if (!freelancer) {
+        return res.status(400).json({ success: false, message: 'Freelancer not found' });
+      }
+      await Freelancer.updateOne(
+        { _id: freelancerId },
+        { $pull: { appliedProjects: projectId } }
+      );
     }
-    await Freelancer.updateOne(
-      { _id: freelancerId },
-      { $pull: { appliedProjects: projectId } }
-    );
 
     res.status(200).json({ success: true, message: 'Application canceled successfully.' });
   } catch (error) {
