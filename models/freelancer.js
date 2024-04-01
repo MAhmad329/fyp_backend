@@ -65,13 +65,7 @@ var freelancerSchema = new mongoose.Schema({
     company: { type: String},
     startDate: { type: String},
     endDate: { type: String},
-}],
-
-  PhoneNo: {
-    type: String,
-    minLength: [11, "Phone Number must be 11 digits"],
-    unique: [true, "Phone Number already Exists"]
-  }
+}]
 ,
   appliedProjects: [
     {
