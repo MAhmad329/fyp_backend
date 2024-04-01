@@ -102,7 +102,7 @@ socket.on('team chat message', ({ teamId, sender, senderUsername, content }) => 
 //  );
 
 const connection = mongoose.connect(
-     "mongodb+srv://azanahmad666:azanahmad666@outsourcepro.teurmbm.mongodb.net/?retryWrites=true&w=majority&appName=OutsourcePro"
+     "mongodb+srv://azanahmad666:azanahmad666@cluster0.nqsuuu2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
    );
 
 console.log("Connecting..");
