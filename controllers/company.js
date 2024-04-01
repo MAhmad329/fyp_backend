@@ -5,7 +5,7 @@ const Project = require("../models/project");
 const Team = require("../models/team");
 const { sendEmail } = require("../middlewares/sendEmail");
 const Freelancer = require("../models/freelancer");
-
+const Task = require("../models/task");
 
 exports.loginCompany = async (req, res) => {
   try {
@@ -142,6 +142,37 @@ exports.getProjectSelection = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err });
   }
 };
+
+exports.getAllTasksCompany = async (req, res) => {
+  try {
+      const projectId = req.params.id;
+      console.log('Project ID:', projectId);
+
+      // Fetch the project to get the selectedTeam attribute
+      const project = await Project.findById(projectId);
+
+      if (!project) {
+          return res.status(404).json({ success: false, message: 'Project not found' });
+      }
+
+      const teamId = project.selectedTeam;
+      console.log('Team ID:', teamId);
+
+      // Fetch tasks that match projectId and teamId
+      const tasks = await Task.find({ project: projectId, team: teamId }).populate('assignee');
+
+      res.status(200).json({
+          success: true,
+          message: 'Tasks fetched successfully',
+          tasks
+      });
+
+  } catch (error) {
+      console.error('Error fetching tasks:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 
 
 
