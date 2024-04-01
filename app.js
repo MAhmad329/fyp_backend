@@ -95,7 +95,7 @@ socket.on('team chat message', ({ teamId, sender, senderUsername, content }) => 
 
 
 
-// Make Connection with the database
+//Make Connection with the database
 
 //  const connection = mongoose.connect(
 //    "mongodb+srv://outsourcepro:outsourcepro@cluster0.p5nmxic.mongodb.net/?retryWrites=true&w=majority"

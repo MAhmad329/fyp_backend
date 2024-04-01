@@ -14,6 +14,7 @@ exports.createProject = async (req, res) => {
       requiresTeam: req.body.requiresTeam,
       requiredMembers: req.body.requiredMembers,
       owner: req.company._id,
+      deadline: req.body.deadline,
     };
     const newProject = await Projects.create(newProjectData);
     const company = await Companies.findById(req.company._id);
@@ -22,6 +23,7 @@ exports.createProject = async (req, res) => {
 
     res.status(201).json({
       success: true,
+      message: "Project Created",
       project: newProject,
     });
   } catch (error) {

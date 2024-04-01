@@ -67,6 +67,10 @@ var projectSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  deadline: {
+    type: Date,
+    required: true,
+  }
 });
 
 // Conditionally set the ref for selectedApplicant based on requiresTeam
