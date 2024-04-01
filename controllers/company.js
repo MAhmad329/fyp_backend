@@ -62,18 +62,48 @@ exports.selectFreelancerOrTeam = async (req, res) => {
     }
 
     if (project.requiresTeam) {
-      const team = await Team.findById(selectedId); // Fetch the team from the database
+      const team = await Team.findById(selectedId);
       if (!team) {
         return res.status(404).json({ message: 'Team not found' });
       }
       project.selectedTeam = selectedId;
       team.assignedProjects.push(projectId);
-      await team.save(); // Save the updated team
+
+      // Remove the project from all team applicants and their appliedProjects
+      for (const applicantId of project.teamApplicants) {
+    const applicantTeam = await Team.findById(applicantId);
+    if (applicantTeam) {
+        console.log('Before:', applicantTeam.projects);
+        applicantTeam.projects = applicantTeam.projects.filter(proj => proj.toString() !== projectId);
+        console.log('After:', applicantTeam.projects);
+        await applicantTeam.save();
+    }
+}
+
+      // Clear the teamApplicants array
+      project.teamApplicants = [];
+
+      await team.save();
     } else {
-      const freelancerr = await Freelancer.findById(selectedId);
+      const freelancer = await Freelancer.findById(selectedId);
+      if (!freelancer) {
+        return res.status(404).json({ message: 'Freelancer not found' });
+      }
       project.selectedApplicant = selectedId;
-      freelancerr.ongoingProjects.push(projectId);
-      await freelancerr.save(); 
+      freelancer.ongoingProjects.push(projectId);
+
+      // Remove the project from all freelancer applicants and their appliedProjects
+      for (const applicantId of project.freelancerApplicants) {
+        const applicantFreelancer = await Freelancer.findById(applicantId);
+        if (applicantFreelancer) {
+          applicantFreelancer.appliedProjects = applicantFreelancer.appliedProjects.filter(proj => proj.toString() !== projectId);
+          await applicantFreelancer.save();
+        }
+      }
+      // Clear the freelancerApplicants array
+      project.freelancerApplicants = [];
+
+      await freelancer.save();
     }
 
     await project.save();
@@ -84,6 +114,7 @@ exports.selectFreelancerOrTeam = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 
 exports.logoutCompany = async (req, res) => {

@@ -120,7 +120,7 @@ exports.getProjectsRequiringTeam = async (req, res) => {
 exports.getCompanyFreelancerProjects = async (req, res) => {
   try {
     const companyId = req.company.id;
-    const projects = await Projects.find({ owner: companyId, requiresTeam:false }).populate('owner', 'name');
+    const projects = await Projects.find({ owner: companyId, requiresTeam:false }).populate('owner', 'name').populate('freelancerApplicants');
     res.status(200).json({
       success: true,
       count: projects.length,
@@ -137,7 +137,12 @@ exports.getCompanyTeamProjects = async (req, res) => {
   try {
     const companyId = req.company.id;
     console.log(companyId)
-    const projects = await Projects.find({ owner: companyId, requiresTeam:true }).populate('owner', 'name');
+    const projects = await Projects.find({ owner: companyId, requiresTeam:true }).populate('owner', 'name').populate({
+        path: 'teamApplicants',
+        populate: {
+          path: 'members'
+        }
+      });
     res.status(200).json({
       success: true,
       count: projects.length,
@@ -471,7 +476,10 @@ exports.getTeamAssignedProjects = async (req, res) => {
 
     const freelancerteam = await Freelancer.findById(freelancerId).populate({
       path: 'teams',
-      populate: { path: 'assignedProjects' }
+      populate: {
+        path: 'assignedProjects',
+        populate: { path: 'owner' } // Populate the owner field
+      }
     });
 
     // Get the first team
@@ -504,7 +512,10 @@ exports.getSoloAssignedProjects = async (req, res) => {
     const freelancerId = req.freelancer._id;
 
     // Fetch the freelancer along with their ongoing projects
-    const freelancer = await Freelancer.findById(freelancerId).populate('ongoingProjects');
+    const freelancer = await Freelancer.findById(freelancerId).populate({
+      path: 'ongoingProjects',
+      populate: { path: 'owner' } // Populate the owner field
+    });
 
     // Check if the freelancer has any ongoing projects
     if (!freelancer.ongoingProjects || freelancer.ongoingProjects.length === 0) {
