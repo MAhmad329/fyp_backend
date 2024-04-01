@@ -49,6 +49,7 @@ exports.selectFreelancerOrTeam = async (req, res) => {
   try {
     const { projectId } = req.params;
     const { selectedId } = req.body;
+    console.log(projectId, selectedId);
 
     const project = await Project.findById(projectId);
 
@@ -58,12 +59,14 @@ exports.selectFreelancerOrTeam = async (req, res) => {
 
     // Check if the project has already been selected
     if (project.selectedTeam || project.selectedApplicant) {
+      console.log('Project has already been selected');
       return res.status(400).json({ message: 'Project has already been selected' });
     }
 
     if (project.requiresTeam) {
       const team = await Team.findById(selectedId);
       if (!team) {
+        console.log('Team not found');
         return res.status(404).json({ message: 'Team not found' });
       }
       project.selectedTeam = selectedId;
@@ -108,12 +111,69 @@ exports.selectFreelancerOrTeam = async (req, res) => {
 
     await project.save();
 
-    res.status(200).json({ message: 'Selection updated successfully', project });
+    res.status(200).json({success:true, message: 'Selection updated successfully', project });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+exports.getProjectSelection = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    let result = {};
+    let teamSkills = [];
+    if (project.requiresTeam) {
+      await project.populate({
+        path: 'selectedTeam',
+        populate: { path: 'members' } // Populate the members array within the selectedTeam
+      });
+      //console.log(project.selectedTeam);
+
+      
+        // Loop through each member of the team
+        project.selectedTeam.members.forEach(member => {
+          // Concatenate the member's skills to the teamSkills array
+          teamSkills = teamSkills.concat(member.skills);
+        });
+
+        // Remove duplicates from the teamSkills array
+        teamSkills = [...new Set(teamSkills)];
+
+        
+      
+      result = {
+        projectId: project._id,
+        title: project.title,
+        selectedTeam: project.selectedTeam,
+        teamSkills
+      };
+      //console.log(result)
+    } else {
+      await project.populate('selectedApplicant');
+      result = {
+        projectId: project._id,
+        title: project.title,
+        selectedApplicant: project.selectedApplicant
+      };
+    }
+
+    res.json({
+      success:true,
+      result
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err });
+  }
+};
+
+
 
 
 

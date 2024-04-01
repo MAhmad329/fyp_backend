@@ -14,6 +14,7 @@ exports.createProject = async (req, res) => {
       requiresTeam: req.body.requiresTeam,
       requiredMembers: req.body.requiredMembers,
       owner: req.company._id,
+      deadline: req.body.deadline,
     };
     const newProject = await Projects.create(newProjectData);
     const company = await Companies.findById(req.company._id);
@@ -22,6 +23,7 @@ exports.createProject = async (req, res) => {
 
     res.status(201).json({
       success: true,
+      message: "Project Created",
       project: newProject,
     });
   } catch (error) {
@@ -161,19 +163,60 @@ exports.getApplicants = async (req, res) => {
     const projectId = req.params.projectId;
     const project = await Projects.findById(projectId)
       .populate('freelancerApplicants')
-      .populate('teamApplicants');
+      .populate({
+        path: 'teamApplicants',
+        populate: { path: 'members' }
+      });
 
     if (!project) {
       return res.status(404).send({ message: 'Project not found' });
     }
 
-    const applicants = project.requiresTeam ? project.teamApplicants : project.freelancerApplicants;
+    let applicants = project.requiresTeam ? project.teamApplicants : project.freelancerApplicants;
 
-    res.status(200).send(applicants);
+    if (project.requiresTeam) {
+      // Create a new array to hold team applicants with their skills
+      let teamApplicantsWithSkills = [];
+
+      // Loop through each team applicant
+      applicants.forEach(teamApplicant => {
+        // Initialize an array to store the skills of this team's members
+        let teamSkills = [];
+
+        // Loop through each member of the team
+        teamApplicant.members.forEach(member => {
+          // Concatenate the member's skills to the teamSkills array
+          teamSkills = teamSkills.concat(member.skills);
+        });
+
+        // Remove duplicates from the teamSkills array
+        teamSkills = [...new Set(teamSkills)];
+
+        // Add the team applicant with its skills to the new array
+        teamApplicantsWithSkills.push({
+          teamApplicant: teamApplicant,
+          skills: teamSkills
+        });
+      });
+
+      // Update the applicants array to include skills
+      applicants = teamApplicantsWithSkills;
+    }
+
+    res.status(200).json({
+      success: true,
+      project: project,
+      count: applicants.length,
+      applicants: applicants
+    });
   } catch (error) {
     res.status(500).send({ message: 'Error retrieving applicants', error: error.message });
   }
 };
+
+
+
+
 
 
 exports.searchProjects = async (req, res) => {
