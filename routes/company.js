@@ -9,7 +9,8 @@ const {
   getCompanyDetails,
   updateCompanyProfile,
   selectFreelancerOrTeam,
-  getProjectSelection
+  getProjectSelection,
+  getAllTasksCompany
 //   getMyCompanyProfile,
 //   updateCompanyProfile,
 } = require("../controllers/company");
@@ -31,6 +32,8 @@ router.route("/Company/details").get(isCompanyAuthenticated, getCompanyDetails);
 router.route("/Company/updateprofile").put(isCompanyAuthenticated, updateCompanyProfile);
 router.route('/Company/select/:projectId').patch(selectFreelancerOrTeam);
 router.route('/Company/project/:projectId').get(getProjectSelection);
+router.route('/Company/:id/getTasks').get(getAllTasksCompany);
+
 
 // router
 //   .route("/Company/updateprofile")
