@@ -231,7 +231,7 @@ exports.searchProjects = async (req, res) => {
       });
     }
 
-    const project = await Projects.find({ title: { $regex: new RegExp(title, "i") } });
+    const project = await Projects.find({ title: { $regex: new RegExp(title, "i") } }).populate('owner');
 
     res.status(200).json({
       success: true,

@@ -84,6 +84,20 @@ var freelancerSchema = new mongoose.Schema({
       ref: "Project",
     }
   ],
+
+  followers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Freelancer",
+    },
+  ],
+  following: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Freelancer",
+    },
+  ],
+
   resetPasswordToken: String,
   resetPasswordDate: Date,
 });
