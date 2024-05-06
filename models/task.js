@@ -6,11 +6,11 @@ const taskSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  assignee: {
+  assignee: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Freelancer",
     required: true,
-  },
+  }],
   owner:{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Freelancer",

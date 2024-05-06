@@ -27,9 +27,12 @@ exports.addTaskToMember = async (req, res) => {
         }
 
         // Check if the member is in the team
-        const isMemberInTeam = team.members.some(member => member.toString() === memberId);
-        if (!isMemberInTeam) {
-            return res.status(404).json({ error: 'Member is not in the team' });
+        const areAllMembersInTeam = memberId.every(memberId => 
+            team.members.some(member => member.toString() === memberId)
+        );
+
+        if (!areAllMembersInTeam) {
+            return res.status(404).json({ error: 'One or more members are not in the team' });
         }
 
         // Create and save the new task
@@ -53,42 +56,32 @@ exports.addTaskToMember = async (req, res) => {
 };
 exports.submitTaskWork = async (req, res) => {
     try {
-        
         const { taskId, workDone } = req.body;
 
-        //If no work done or notes are provided, return an error
-        if(!workDone){
+        if (!workDone) {
             return res.status(400).json({
                 success: false,
                 message: "Missing data"
             });
-        };
+        }
 
-        
-        //Get the logged user id
         const userId = req.freelancer ? req.freelancer._id : null;
-
-        // Find the task with the given ID
-        const task = await Task.findById(taskId);
+        const task = await Task.findById(taskId).populate('assignee'); // Assuming you might need detailed information
 
         // Check if the user has permission to update the task
-        if (!userId || !task.assignee.equals(userId)) {
+        if (!userId || !task.assignee.some(assignee => assignee._id.equals(userId))) {
             return res.status(403).json({
                 success: false,
                 message: "Forbidden"
             });
         }
 
-        // Update the fields of the task
-        task.set({
-            submittedWork: workDone,
-            status: "submitted",
-        }).markModified("submittedWork"); // Mark modified because we only want to save this field
+        // Update the task
+        task.submittedWork = workDone;
+        task.status = "submitted";
 
-        // Save the updated task in the database
         await task.save();
 
-        // Send a response back to the client
         res.status(201).json({
             success: true,
             message: "Work submitted successfully",
@@ -99,6 +92,7 @@ exports.submitTaskWork = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 exports.saveTaskStatus = async (req, res) => {
     try {
         
