@@ -1,197 +1,346 @@
-
 const Post = require('../models/community');
 const Freelancer = require('../models/freelancer');
+const Company = require('../models/company');
+
 // Create a post
 exports.createPost = async (req, res) => {
-    const { content } = req.body;
-    
-    const freelancer = req.freelancer._id;
+    const { content, media = [] } = req.body;
+    const user = req.freelancer || req.company;
+    const userType = req.freelancer ? 'Freelancer' : 'Company';
 
-  const newPost =  Post({
-    author: freelancer, // Assuming user ID comes from authenticated session
-    content
-  });
-
-  try {
-    const savedPost = await newPost.save();
-    res.status(200).json({
-      success: true,
-      savedPost,
+    const newPost = Post({
+        author: user._id,
+        authorType: userType,
+        content,
+        media,
+        likesType: userType,
     });
-  } catch (error) {
-    res.status(400).json({ message: 'Failed to create post', error });
-  }
+
+    try {
+        const savedPost = await newPost.save();
+        res.status(200).json({
+            success: true,
+            savedPost,
+        });
+    } catch (error) {
+        res.status(400).json({ message: 'Failed to create post', error });
+    }
 };
 
-// Get all posts
 exports.getAllPosts = async (req, res) => {
-  try {
-    const posts = await Post.find().populate('author');
-    res.status(200).json({
-      success: true,
-      posts,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
+    try {
+        const posts = await Post.find().lean();
+        
+        const populatedPosts = await Promise.all(
+            posts.map(async (post) => {
+                if (post.authorType === 'Freelancer') {
+                    post.author = await Freelancer.findById(post.author);
+                } else {
+                    post.author = await Company.findById(post.author);
+                }
+
+                post.likes = await Promise.all(
+                    post.likes.map(async (like) => {
+                        if (like.userType === 'Freelancer') {
+                            like.user = await Freelancer.findById(like.user);
+                        } else {
+                            like.user = await Company.findById(like.user);
+                        }
+                        return like;
+                    })
+                );
+
+                post.comments = await Promise.all(
+                    post.comments.map(async (comment) => {
+                        if (comment.commenterType === 'Freelancer') {
+                            comment.commenter = await Freelancer.findById(comment.commenter);
+                        } else {
+                            comment.commenter = await Company.findById(comment.commenter);
+                        }
+                        return {
+                            _id: comment._id,
+                            commenter: comment.commenter,
+                            commenterType: comment.commenterType,
+                            content: comment.content,
+                            timestamp: comment.timestamp
+                        };
+                    })
+                );
+
+                return post;
+            })
+        );
+
+        res.status(200).json({
+            success: true,
+            posts: populatedPosts,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
 };
+
+
+
 
 // Like a post
 exports.likePost = async (req, res) => {
-  const postId = req.params.id;
-  const userId = req.freelancer._id; // Assuming user ID comes from authenticated session
+    const postId = req.params.id;
+    const currentUser = req.freelancer || req.company;
+    const currentUserType = req.freelancer ? 'Freelancer' : 'Company';
 
-  try {
-    const post = await Post.findById(postId);
-    if (post.likes.includes(userId)) {
-      // If already liked, unlike it
-      post.likes.pull(userId);
-    } else {
-      // Else, like the post
-      post.likes.push(userId);
+    try {
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
+        }
+
+        // Check if the current user has already liked the post
+        const alreadyLiked = post.likes.some(
+            like => like.user.equals(currentUser._id) && like.userType === currentUserType
+        );
+
+        if (!alreadyLiked) {
+            post.likes.push({
+                user: currentUser._id,
+                userType: currentUserType
+            });
+            await post.save();
+            res.status(200).json({ success: true, post });
+        } else {
+            res.status(400).json({ message: 'Already liked' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to like post', error });
     }
-    await post.save();
-    res.status(200).json({
-    success: true,
-    post,
-    });
-  } catch (error) {
-    res.status(400).json({ message: 'Failed to like/unlike post', error });
-  }
 };
 
-// Delete a post
-exports.deletePost = async (req, res) => {
-  const postId = req.params.id;
-  try {
-    const post = await Post.findByIdAndDelete(postId);
-    res.status(200).json({ message: 'Post deleted successfully', post });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to delete post', error });
-  }
+
+
+// Unlike a post
+// Unlike a post
+exports.unlikePost = async (req, res) => {
+    const postId = req.params.id;
+    const currentUser = req.freelancer || req.company;
+    const currentUserType = req.freelancer ? 'Freelancer' : 'Company';
+
+    try {
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
+        }
+
+        // Find the index of the like that matches the current user and type
+        const likeIndex = post.likes.findIndex(
+            like => like.user.equals(currentUser._id) && like.userType === currentUserType
+        );
+
+        if (likeIndex !== -1) {
+            // Remove the like from the array
+            post.likes.splice(likeIndex, 1);
+            await post.save();
+            res.status(200).json({ success: true, post });
+        } else {
+            res.status(400).json({ message: 'Not liked yet' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to unlike post', error });
+    }
 };
+
+
+
+// // Delete a post
+// exports.deletePost = async (req, res) => {
+//     const postId = req.params.id;
+//     try {
+//         const post = await Post.findByIdAndDelete(postId);
+//         res.status(200).json({ message: 'Post deleted successfully', post });
+//     } catch (error) {
+//         res.status(500).json({ message: 'Failed to delete post', error });
+//     }
+// };
+
 
 exports.addComment = async (req, res) => {
-  const postId = req.params.postId;
-  const { content } = req.body;
-  const commenterId = req.freelancer._id; // Assuming this is set from authentication middleware
+    const postId = req.params.postId;
+    const { content } = req.body;
+    const currentUser = req.freelancer || req.company;
+    const commenterType = req.freelancer ? 'Freelancer' : 'Company';
 
-  try {
-    const post = await Post.findById(postId);
-    if (!post) {
-      return res.status(404).send('Post not found');
+    try {
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).send('Post not found');
+        }
+        post.comments.push({
+            commenter: currentUser._id,
+            commenterType: commenterType,
+            content,
+            timestamp: new Date(),
+        });
+
+        await post.save();
+        res.status(201).json({ success: true, post });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to add comment', error });
     }
-    // Adding the new comment to the comments array
-    post.comments.push({
-      commenter: commenterId,
-      content,
-      timestamp: new Date()
-    });
-
-    await post.save();
-    res.status(201).json(post);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to add comment', error });
-  }
 };
+
 
 
 // Get comments for a post
 exports.getPostWithComments = async (req, res) => {
-  const postId = req.params.postId;
+    const postId = req.params.postId;
 
-  try {
-    const post = await Post.findById(postId).populate('author').populate('comments.commenter');
-    if (!post) {
-      return res.status(404).send('Post not found');
+    try {
+        const post = await Post.findById(postId)
+            .populate('author')
+            .populate('comments.commenter');
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        res.status(200).json({ success: true, post });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to get post', error });
     }
-    res.status(200).json(post);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to get post', error });
-  }
 };
 
+
+// Delete a post
+exports.deletePost = async (req, res) => {
+    const postId = req.params.id;
+    const currentUser = req.freelancer || req.company;
+    const currentUserType = req.freelancer ? 'Freelancer' : 'Company';
+
+    try {
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        // Check if the current user is the author
+        if (post.author.equals(currentUser._id) && post.authorType === currentUserType) {
+            await post.deleteOne();
+            res.status(200).json({ success: true, message: 'Post deleted successfully' });
+        } else {
+            res.status(403).json({ message: 'Not authorized to delete this post' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete post', error });
+    }
+};
 
 // Delete a comment
 exports.deleteComment = async (req, res) => {
-  const postId = req.params.postId;
-  const commentId = req.params.commentId;
+    const postId = req.params.postId;
+    const commentId = req.params.commentId;
+    const currentUser = req.freelancer || req.company;
+    const currentUserType = req.freelancer ? 'Freelancer' : 'Company';
 
-  try {
-    const post = await Post.findById(postId);
-    if (!post) {
-      return res.status(404).json({ message: 'Post not found' });
-    }
-    
-    const comment = post.comments.id(commentId);
-    if (!comment) {
-      return res.status(404).json({ message: 'Comment not found' });
-    }
-    comment.deleteOne();
-    await post.save();
-    res.status(200).json({ message: 'Comment deleted successfully', post });
-  } catch (error) {
-    console.error("Error when deleting comment:", error); // Log error to the console for debugging
-    res.status(500).json({ message: 'Failed to remove comment', error: error.message });
-  }
-};
-
-exports.followFreelancer = async (req, res) => {
     try {
-        const { freelancerId } = req.params;
-        const currentFreelancer = req.freelancer._id;
-
-        const freelancerToFollow = await Freelancer.findById(freelancerId);
-        const currentFreelancerData = await Freelancer.findById(currentFreelancer);
-
-        if (!freelancerToFollow || !currentFreelancerData) {
-            return res.status(404).json({ message: 'Freelancer not found' });
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
         }
 
-        if (currentFreelancerData.following.includes(freelancerId)) {
+        const comment = post.comments.id(commentId);
+        if (!comment) {
+            return res.status(404).json({ message: 'Comment not found' });
+        }
+
+        // Check if the current user is the commenter
+        if (comment.commenter.equals(currentUser._id) && comment.commenterType === currentUserType) {
+            comment.deleteOne();
+            await post.save();
+            res.status(200).json({ success: true, message: 'Comment deleted successfully', post });
+        } else {
+            res.status(403).json({ message: 'Not authorized to delete this comment' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete comment', error });
+    }
+};
+
+
+// Follow a freelancer or company
+exports.followUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const currentUser = req.freelancer || req.company;
+        const currentUserType = req.freelancer ? 'Freelancer' : 'Company';
+
+        // Determine the type of user to follow
+        let userToFollow = await Freelancer.findById(userId);
+        let userTypeToFollow = 'Freelancer';
+        if (!userToFollow) {
+            userToFollow = await Company.findById(userId);
+            userTypeToFollow = 'Company';
+        }
+
+        if (!userToFollow) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Prevent self-following
+        if (currentUser._id.equals(userToFollow._id)) {
+            return res.status(400).json({ message: 'Cannot follow yourself' });
+        }
+
+        // Check if already following
+        if (currentUser.following.includes(userId)) {
             return res.status(400).json({ message: 'Already following' });
         }
 
-        freelancerToFollow.followers.push(currentFreelancer);
-        currentFreelancerData.following.push(freelancerId);
+        // Add to followers and following
+        userToFollow.followers.push({ _id: currentUser._id, type: currentUserType });
+        currentUser.following.push({ _id: userToFollow._id, type: userTypeToFollow });
 
-        await freelancerToFollow.save();
-        await currentFreelancerData.save();
+        await userToFollow.save();
+        await currentUser.save();
 
         res.status(200).json({ success: true, message: 'Followed successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to follow freelancer', error });
+        res.status(500).json({ message: 'Failed to follow user', error });
     }
 };
 
-// Unfollow a freelancer
-exports.unfollowFreelancer = async (req, res) => {
+// Unfollow a user
+exports.unfollowUser = async (req, res) => {
     try {
-        const { freelancerId } = req.params;
-        const currentFreelancer = req.freelancer._id;
+        const { userId } = req.params;
+        const currentUser = req.freelancer || req.company;
+        const currentUserType = req.freelancer ? 'Freelancer' : 'Company';
 
-        const freelancerToUnfollow = await Freelancer.findById(freelancerId);
-        const currentFreelancerData = await Freelancer.findById(currentFreelancer);
-
-        if (!freelancerToUnfollow || !currentFreelancerData) {
-            return res.status(404).json({ message: 'Freelancer not found' });
+        // Determine the type of user to unfollow
+        let userToUnfollow = await Freelancer.findById(userId);
+        let userTypeToUnfollow = 'Freelancer';
+        if (!userToUnfollow) {
+            userToUnfollow = await Company.findById(userId);
+            userTypeToUnfollow = 'Company';
         }
 
-        if (!currentFreelancerData.following.includes(freelancerId)) {
+        if (!userToUnfollow) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if already not following
+        if (!currentUser.following.includes(userId)) {
             return res.status(400).json({ message: 'Not following' });
         }
 
-        freelancerToUnfollow.followers.pull(currentFreelancer);
-        currentFreelancerData.following.pull(freelancerId);
+        // Remove from followers and following
+        userToUnfollow.followers.pull({ _id: currentUser._id, type: currentUserType });
+        currentUser.following.pull({ _id: userToUnfollow._id, type: userTypeToUnfollow });
 
-        await freelancerToUnfollow.save();
-        await currentFreelancerData.save();
+        await userToUnfollow.save();
+        await currentUser.save();
 
         res.status(200).json({ success: true, message: 'Unfollowed successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to unfollow freelancer', error });
+        res.status(500).json({ message: 'Failed to unfollow user', error });
     }
 };
