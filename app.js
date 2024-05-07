@@ -3,10 +3,8 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-var http = require('http');
+var http = require("http");
 require("dotenv").config();
-
-
 
 const mongoose = require("mongoose");
 var cors = require("cors");
@@ -21,80 +19,94 @@ var companyRouter = require("./routes/company");
 var firebaseRouter = require("./routes/firebase");
 var freelancerRouter = require("./routes/freelancer");
 var chatRouter = require("./routes/chat");
-var communityRouter = require("./routes/community")
-const  Team  = require("./models/team")
+var communityRouter = require("./routes/community");
+var paymentRouter = require("./routes/paymentRoute");
+
+const Team = require("./models/team");
 
 var app = express();
 var server = http.createServer(app); // Create an HTTP server
-var io = require('socket.io')(server, {
+var io = require("socket.io")(server, {
   cors: {
-    origin: 'http://localhost:3001',
-    methods: ['GET', 'POST'],
+    origin: "http://localhost:3001",
+    methods: ["GET", "POST"],
     credentials: true,
   },
-});// Set up Socket.IO
+}); // Set up Socket.IO
 
-app.set('io', io);
+app.set("io", io);
 
-
-app.set('io', io);
+app.set("io", io);
 
 const activeUsers = new Map();
 
-io.on('connection', (socket) => {
-    console.log('A user connected');
+io.on("connection", (socket) => {
+  console.log("A user connected");
 
-    socket.on('user online', ({ userId }) => {
-        activeUsers.set(userId, socket.id);
-        socket.userId = userId;
-    });
+  socket.on("user online", ({ userId }) => {
+    activeUsers.set(userId, socket.id);
+    socket.userId = userId;
+  });
 
-    // When sending a message from the server, add a timestamp
-socket.on('individual chat message', async ({ sender, receiverId, content }) => {
-  const receiverSocketId = activeUsers.get(receiverId);
-  if (receiverSocketId && receiverSocketId !== socket.id) {
-    const timestamp = new Date(); // Get current time
-    const isRead = false;
-    io.to(receiverSocketId).emit('individual chat message', { sender, content, timestamp,isRead });
-  }
-});
-
-
-// socket.on('team chat message', async ({ teamId, senderId, content }) => {
-//     const team = await Team.findById(teamId);
-//     if (team) {
-//         team.members.forEach(memberId => {
-//             const memberSocketId = activeUsers.get(memberId.toString());
-//             if (memberSocketId) {
-//                 io.to(memberSocketId).emit('team chat message', { senderId, content });
-//             }
-//         });
-//         const senderSocketId = activeUsers.get(senderId); // Get the sender's socket ID
-//         if (senderSocketId) {
-//             io.to(senderSocketId).emit('team chat message', { senderId, content }); // Emit back to the sender
-//         }
-//     }
-// });
-  
-
-socket.on('team chat message', ({ teamId, sender, senderUsername, content }) => {
-        const timestamp = new Date();
+  // When sending a message from the server, add a timestamp
+  socket.on(
+    "individual chat message",
+    async ({ sender, receiverId, content }) => {
+      const receiverSocketId = activeUsers.get(receiverId);
+      if (receiverSocketId && receiverSocketId !== socket.id) {
+        const timestamp = new Date(); // Get current time
         const isRead = false;
-        io.to(teamId).emit('team chat message', { sender, senderUsername, content, timestamp, isRead });
-    });
+        io.to(receiverSocketId).emit("individual chat message", {
+          sender,
+          content,
+          timestamp,
+          isRead,
+        });
+      }
+    }
+  );
 
-    socket.on('join team chat', ({ teamId }) => {
-        socket.join(teamId);
-        console.log(`User ${socket.userId} joined team chat ${teamId}`);
-    });
+  // socket.on('team chat message', async ({ teamId, senderId, content }) => {
+  //     const team = await Team.findById(teamId);
+  //     if (team) {
+  //         team.members.forEach(memberId => {
+  //             const memberSocketId = activeUsers.get(memberId.toString());
+  //             if (memberSocketId) {
+  //                 io.to(memberSocketId).emit('team chat message', { senderId, content });
+  //             }
+  //         });
+  //         const senderSocketId = activeUsers.get(senderId); // Get the sender's socket ID
+  //         if (senderSocketId) {
+  //             io.to(senderSocketId).emit('team chat message', { senderId, content }); // Emit back to the sender
+  //         }
+  //     }
+  // });
 
-    socket.on('disconnect', () => {
-        activeUsers.delete(socket.userId);
-        console.log('User disconnected');
-    });
+  socket.on(
+    "team chat message",
+    ({ teamId, sender, senderUsername, content }) => {
+      const timestamp = new Date();
+      const isRead = false;
+      io.to(teamId).emit("team chat message", {
+        sender,
+        senderUsername,
+        content,
+        timestamp,
+        isRead,
+      });
+    }
+  );
+
+  socket.on("join team chat", ({ teamId }) => {
+    socket.join(teamId);
+    console.log(`User ${socket.userId} joined team chat ${teamId}`);
+  });
+
+  socket.on("disconnect", () => {
+    activeUsers.delete(socket.userId);
+    console.log("User disconnected");
+  });
 });
-
-
 
 //Make Connection with the database
 
@@ -103,8 +115,8 @@ socket.on('team chat message', ({ teamId, sender, senderUsername, content }) => 
 //  );
 
 const connection = mongoose.connect(
-     "mongodb+srv://azanahmad666:azanahmad666@cluster0.nqsuuu2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-   );
+  "mongodb+srv://azanahmad666:azanahmad666@cluster0.nqsuuu2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+);
 
 console.log("Connecting..");
 
@@ -124,13 +136,13 @@ app.set("view engine", "jade");
 
 app.use(logger("dev"));
 app.use(express.json());
-app.use(cors({ credentials:true, origin: "http://localhost:3001" }));
+app.use(cors({ credentials: true, origin: "http://localhost:3001" }));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-app.use(function(req, res, next) {
-  res.header('Access-Control-Allow-Credentials', true);
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Credentials", true);
   // other headers...
   next();
 });
@@ -146,7 +158,7 @@ app.use("/api/v1", firebaseRouter);
 app.use("/api/v1", freelancerRouter);
 app.use("/api/v1", chatRouter);
 app.use("/api/v1", communityRouter);
-
+app.use("/api/v1/payment", paymentRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
