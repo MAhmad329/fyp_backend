@@ -56,10 +56,10 @@ exports.createProject = async (req, res) => {
     // Aggregate skills based on the required members' roles using fuzzy matching
     requiredMembers.forEach(role => {
       const choices = Object.keys(roleSkillsMapping);
-      const result = fuzzball.extractOne(role.toLowerCase(), choices, { scorer: fuzzball.ratio });
-      // If match score is above the threshold (85% here), add the skills to the requiredSkills array
-      if (result[1] >= 85) {
-        requiredSkills = [...new Set([...requiredSkills, ...roleSkillsMapping[result[0]]])];
+      const results = fuzzball.extract(role.toLowerCase(), choices, { scorer: fuzzball.ratio, limit: 1 }); // limit to the top 2 matches
+      // Check if the best match is above the threshold
+      if (results.length > 0 && results[0][1] >= 85) {
+        requiredSkills = [...new Set([...requiredSkills, ...roleSkillsMapping[results[0][0]]])];
       }
     });
 
