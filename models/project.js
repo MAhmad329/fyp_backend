@@ -62,6 +62,10 @@ var projectSchema = new mongoose.Schema({
     required: true,
   }
   ],
+
+  requiredSkills: [{
+    type: String
+  }],
   
   createdAt: {
     type: Date,

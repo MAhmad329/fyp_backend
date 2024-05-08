@@ -22,6 +22,7 @@ const teamSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Project",
   }],
+  teamSkills: [{type: String}]
 });
 
 const Team = mongoose.model('Team', teamSchema);

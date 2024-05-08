@@ -11,7 +11,8 @@ const {
     getPostWithComments,
     deleteComment,
     followUser,
-    unfollowUser
+    unfollowUser,
+    getPostsByUser
 } = require("../controllers/community");
 
 const { isAuthenticated, isCompanyAuthenticated } = require("../middlewares/auth");

@@ -3,37 +3,106 @@ const Freelancer = require("../models/freelancer")
 const Companies = require("../models/company");
 const Team = require("../models/team");
 
+// exports.createProject = async (req, res) => {
+//   try {
+//     const newProjectData = {
+//       title: req.body.title,
+//       description: req.body.description,
+//       budget: req.body.budget,
+//       type: req.body.type,
+//       technologystack: req.body.technologystack,
+//       requiresTeam: req.body.requiresTeam,
+//       requiredMembers: req.body.requiredMembers,
+//       owner: req.company._id,
+//       deadline: req.body.deadline,
+//     };
+//     const newProject = await Projects.create(newProjectData);
+//     const company = await Companies.findById(req.company._id);
+//     company.projects.push(newProject._id);
+//     await company.save();
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Project Created",
+//       project: newProject,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//     console.log(error);
+//   }
+// };
+
+
+const fuzzball = require('fuzzball');
+
+// Mapping of roles to skills (this should ideally be managed in a database or config file)
+const roleSkillsMapping = {
+  "frontend": ["HTML", "CSS", "JavaScript", "ReactJS", "VueJS"],
+  "backend": ["Node.js", "Express", "MongoDB", "Python", "Django"],
+  "fullstack": ["HTML", "CSS", "JavaScript", "Node.js", "ReactJS", "MongoDB"]
+};
+
 exports.createProject = async (req, res) => {
   try {
+    // Extracting data from request body
+    const { title, description, budget, type, technologystack, requiresTeam, requiredMembers, deadline } = req.body;
+
+    // Initialize requiredSkills array
+    let requiredSkills = [];
+
+    // Aggregate skills based on the required members' roles using fuzzy matching
+    requiredMembers.forEach(role => {
+      const choices = Object.keys(roleSkillsMapping);
+      const result = fuzzball.extractOne(role.toLowerCase(), choices, { scorer: fuzzball.ratio });
+      // If match score is above the threshold (85% here), add the skills to the requiredSkills array
+      if (result[1] >= 85) {
+        requiredSkills = [...new Set([...requiredSkills, ...roleSkillsMapping[result[0]]])];
+      }
+    });
+
+    // Prepare new project data
     const newProjectData = {
-      title: req.body.title,
-      description: req.body.description,
-      budget: req.body.budget,
-      type: req.body.type,
-      technologystack: req.body.technologystack,
-      requiresTeam: req.body.requiresTeam,
-      requiredMembers: req.body.requiredMembers,
-      owner: req.company._id,
-      deadline: req.body.deadline,
+      title,
+      description,
+      budget,
+      type,
+      technologystack,
+      requiresTeam,
+      requiredMembers,
+      requiredSkills,  // Adding the computed required skills to the project
+      owner: req.company._id,  // Assuming the company ID is in the request
+      deadline
     };
+
+    // Create the new project in the database
     const newProject = await Projects.create(newProjectData);
+
+    // Add the project to the company's list of projects
     const company = await Companies.findById(req.company._id);
+    if (!company) {
+      return res.status(404).json({ success: false, message: "Company not found" });
+    }
     company.projects.push(newProject._id);
     await company.save();
 
+    // Send success response
     res.status(201).json({
       success: true,
-      message: "Project Created",
-      project: newProject,
+      message: "Project Created Successfully",
+      project: newProject
     });
   } catch (error) {
+    console.error('Error creating project:', error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message
     });
-    console.log(error);
   }
 };
+
 
 exports.deleteProject = async (req, res) => {
   try {
