@@ -16,9 +16,15 @@ const taskSchema = new mongoose.Schema({
     ref: "Freelancer",
    
   },
-  submittedWork:{
-    type: String,
-  },
+  submittedWork: [{
+    freelancerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Freelancer'
+    },
+    workUrl: {
+      type: String,
+    }
+  }],
   deadline: {
     type: Date,
     required: true,
