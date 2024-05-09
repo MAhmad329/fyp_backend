@@ -173,8 +173,19 @@ exports.updateFreelancerProfile = async (req, res) => {
     if (appliedProjects) freelancer.appliedProjects = appliedProjects;
 
     // Save the updated freelancer profile
+  
+    let skillsUpdated = false;
+    if (skills && JSON.stringify(freelancer.skills) !== JSON.stringify(skills)) {
+        freelancer.skills = skills;
+        skillsUpdated = true;
+    }
+
     await freelancer.save();
 
+    // If skills are updated and freelancer is part of a team, update the team skills
+    if (skillsUpdated && freelancer.teams) {
+        await updateTeamSkills(freelancer.teams);
+    }
     // You can customize the response based on what details you want to send to the client
     const updatedFreelancerDetails = {
       firstname: freelancer.firstname,
@@ -201,6 +212,20 @@ exports.updateFreelancerProfile = async (req, res) => {
     });
   }
 };
+
+async function updateTeamSkills(teamId) {
+    const team = await Team.findById(teamId).populate('members');
+    const newSkills = {};
+
+    team.members.forEach(member => {
+        member.skills.forEach(skill => {
+            newSkills[skill] = (newSkills[skill] || 0) + 1;
+        });
+    });
+
+    team.teamSkills = Object.keys(newSkills).map(skill => ({ skill, count: newSkills[skill] }));
+    await team.save();
+}
 
 exports.forgetPassword = async (req,res)=>{
   try {
