@@ -56,29 +56,43 @@ exports.addTaskToMember = async (req, res) => {
 };
 exports.submitTaskWork = async (req, res) => {
     try {
-        const { taskId, workDone } = req.body;
+        const { taskId, submittedWork } = req.body; // Expect submittedWork as an array
 
-        if (!workDone) {
+        if (!submittedWork || submittedWork.length === 0) {
             return res.status(400).json({
                 success: false,
                 message: "Missing data"
             });
         }
 
-        const userId = req.freelancer ? req.freelancer._id : null;
-        const task = await Task.findById(taskId).populate('assignee'); // Assuming you might need detailed information
+        const workDone = submittedWork[0]; // Assuming one entry per submission for simplicity
+        if (!workDone.freelancerId || !workDone.workUrl) {
+            return res.status(400).json({
+                success: false,
+                message: "Incomplete submission data"
+            });
+        }
+
+        // Find the task
+        const task = await Task.findById(taskId).populate('assignee');
+        if (!task) {
+            return res.status(404).json({
+                success: false,
+                message: "Task not found"
+            });
+        }
 
         // Check if the user has permission to update the task
-        if (!userId || !task.assignee.some(assignee => assignee._id.equals(userId))) {
+        if (!task.assignee.some(assignee => assignee._id.equals(workDone.freelancerId))) {
             return res.status(403).json({
                 success: false,
                 message: "Forbidden"
             });
         }
 
-        // Update the task
-        task.submittedWork = workDone;
-        task.status = "submitted";
+        // Add new submission to the submittedWork array
+        task.submittedWork.push(workDone);
+        task.status = "submitted"; // Optionally update the status
 
         await task.save();
 
@@ -88,10 +102,13 @@ exports.submitTaskWork = async (req, res) => {
             task
         });
     } catch (error) {
-        console.error('Error adding task to member:', error);
+        console.error('Error submitting task work:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+
+
 
 exports.saveTaskStatus = async (req, res) => {
     try {

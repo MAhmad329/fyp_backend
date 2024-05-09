@@ -17,6 +17,7 @@ exports.createProject = async (req, res) => {
       owner: req.company._id,
       deadline: req.body.deadline,
     };
+
     const newProject = await Projects.create(newProjectData);
     const company = await Companies.findById(req.company._id);
     company.projects.push(newProject._id);
@@ -35,6 +36,7 @@ exports.createProject = async (req, res) => {
     console.log(error);
   }
 };
+
 
 
 
