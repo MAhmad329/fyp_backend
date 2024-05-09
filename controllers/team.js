@@ -170,7 +170,7 @@ exports.addMemberToTeam = async (req, res) => {
 // };
 
 
-  exports.deleteMemberFromTeam = async (req, res) => {
+ exports.deleteMemberFromTeam = async (req, res) => {
     try {
         const memberId = req.body.memberID; // Assuming memberId is passed in the body
         const freelancerId = req.freelancer._id; // Assuming freelancerId is set in req.freelancer
@@ -223,12 +223,69 @@ exports.addMemberToTeam = async (req, res) => {
         member.teams = null;
         await member.save();
 
-        res.status(200).json({ message: 'Member left the team successfully' });
+        if (team.members.length === 0) {
+            await Team.findByIdAndDelete(team._id)
+            res.status(200).json({ message: 'Team deleted as the last member has left' });
+        } else {
+            res.status(200).json({ message: 'Member removed from the team successfully' });
+        }
     } catch (error) {
         console.error('Error leaving team:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+// exports.deleteMemberFromTeam = async (req, res) => {
+//     try {
+//         const memberId = req.body.memberID; // Assuming memberId is passed in the body
+//         const freelancerId = req.freelancer._id; // Assuming freelancerId is set in req.freelancer
+
+//         // Find the freelancer by ID
+//         const freelancer = await Freelancer.findById(freelancerId);
+//         if (!freelancer) {
+//             return res.status(404).json({ error: 'Freelancer not found' });
+//         }
+
+//         // Check if the freelancer has a team
+//         if (!freelancer.team) {
+//             return res.status(404).json({ error: 'Freelancer does not have a team' });
+//         }
+
+//         // Find the team of the freelancer
+//         const team = await Team.findById(freelancer.teams);
+//         if (!team) {
+//             return res.status(404).json({ error: 'Team not found' });
+//         }
+
+//         // Check if the member exists in the team
+//         if (!team.members.includes(memberId)) {
+//             return res.status(404).json({ error: 'Member does not exist in the team' });
+//         }
+
+//         // Remove the member from the team
+//         team.members.pull(memberId);  // This is a Mongoose way to remove an item from an array
+//         await team.save();
+
+//         // Update the member's teams field to null
+//         const member = await Freelancer.findById(memberId);
+//         if (member) {
+//             member.teams = null;
+//             await member.save();
+//         }
+
+//         // Check if there are no more members in the team
+//         if (team.members.length === 0) {
+//             await team.remove();  // Remove the team if no members left
+//             res.status(200).json({ message: 'Team deleted as the last member has left' });
+//         } else {
+//             res.status(200).json({ message: 'Member removed from the team successfully' });
+//         }
+//     } catch (error) {
+//         console.error('Error leaving team:', error);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// };
+
   
   
 exports.fetchAllTeams = async (req, res) => {

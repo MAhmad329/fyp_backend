@@ -15,7 +15,8 @@ const {
   getApplicants,
   getAllFreelancerProjects,
   getTeamAssignedProjects,
-  getSoloAssignedProjects
+  getSoloAssignedProjects,
+  getRecommendedTeam
 } = require("../controllers/project");
 var router = express.Router();
 const { isCompanyAuthenticated, isAuthenticated } = require("../middlewares/auth");
@@ -26,6 +27,7 @@ router.route("/project/getProjects").get(getAllProjects);
 router.route("/project/getFreelancerProjects").get(getAllFreelancerProjects);
 router.route("/project/getTeamProjects").get(getProjectsRequiringTeam);
 router.route("/project/getProject/:id").post(getProjectDetails);
+router.route("/project/getRecommendedTeam/:id").get(getRecommendedTeam);
 router.route("/project/searchProject").post(searchProjects);
 router.route("/project/:id").delete(isCompanyAuthenticated, deleteProject);
 router.route("/project/applyToProject/:id").post(isAuthenticated, applyToProject);

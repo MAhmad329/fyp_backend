@@ -220,6 +220,62 @@ exports.getApplicants = async (req, res) => {
   }
 };
 
+exports.getRecommendedTeam = async (req, res) => {
+  try {
+    const projectId = req.params.id;
+
+    if (!projectId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Project ID is required.',
+      });
+    }
+
+    const project = await Projects.findById(projectId).populate('teamApplicants');
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found.',
+      });
+    }
+    const myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+
+    const raw = JSON.stringify({
+      "project": project,
+      "teams":project.teamApplicants
+    })
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow"
+    };
+    const flaskApiResponse = await fetch("http://localhost:5000/recommend", requestOptions)
+    const flaskApiResponseJSON = await flaskApiResponse.json()
+    
+    const recommended_team = flaskApiResponseJSON.recommended_teams[0][0]
+    console.log(recommended_team)
+
+    const finalRecommendedTeam = await Team.findById(recommended_team)
+        .populate('members')  // Assuming you only want name and skills of members
+        .populate('owner')  // Assuming you only want the name of the owner
+        .populate('projects'); // Populate specific fields for projects
+
+
+    res.status(200).json({
+      success: true,
+      finalRecommendedTeam,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 
 
 
