@@ -311,7 +311,7 @@ exports.fetchAllTeams = async (req, res) => {
 };
 
  exports.fetchteam = async (req, res) => {
-  const freelancerId = req.freelancer.id;
+  const freelancerId = req.freelancer._id;
   console.log(freelancerId);
   try {
     const freelancer = await Freelancer.findById(freelancerId).populate({
