@@ -92,9 +92,33 @@ exports.getAllProjects = async (req, res) => {
   }
 };
 
+exports.getAllProjectsMobile = async (req, res) => {
+  try {
+    const projects = await Projects.find().populate('owner').populate('freelancerApplicants')  // Populates the project's owner's name
+  .populate({
+    path: 'teamApplicants',  // Path to the team applicants in the project model
+    populate: [
+      { path: 'members' },  // Populates all members within each team applicant
+      { path: 'owner' },
+      
+    ]
+  });
+
+    res.status(200).json({
+      success: true,
+      projects,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 exports.getAllFreelancerProjects = async (req, res) => {
   try {
-    const projects = await Projects.find({ requiresTeam: false });
+    const projects = await Projects.find({ requiresTeam: false }).populate('freelancerApplicants');
 
     res.status(200).json({
       success: true,
@@ -151,6 +175,33 @@ exports.getCompanyTeamProjects = async (req, res) => {
           path: 'members'
         }
       });
+    res.status(200).json({
+      success: true,
+      count: projects.length,
+      data: projects
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error: ' + error.message
+    });
+  }
+};
+
+exports.getCompanyTeamProjectsWithOwner = async (req, res) => {
+  try {
+    const companyId = req.company.id;
+    console.log(companyId)
+    const projects = await Projects.find({ owner: companyId, requiresTeam: true })
+  .populate('owner')  // Populates the project's owner's name
+  .populate({
+    path: 'teamApplicants',  // Path to the team applicants in the project model
+    populate: [
+      { path: 'members' },  // Populates all members within each team applicant
+      { path: 'owner' },
+      
+    ]
+  });
     res.status(200).json({
       success: true,
       count: projects.length,
@@ -293,7 +344,15 @@ exports.searchProjects = async (req, res) => {
       });
     }
 
-    const project = await Projects.find({ title: { $regex: new RegExp(title, "i") } }).populate('owner');
+    const project = await Projects.find({ title: { $regex: new RegExp(title, "i") } }).populate('owner').populate('freelancerApplicants')  // Populates the project's owner's name
+  .populate({
+    path: 'teamApplicants',  // Path to the team applicants in the project model
+    populate: [
+      { path: 'members' },  // Populates all members within each team applicant
+      { path: 'owner' },
+      
+    ]
+  });
 
     res.status(200).json({
       success: true,
