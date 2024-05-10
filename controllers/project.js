@@ -223,7 +223,6 @@ exports.getApplicants = async (req, res) => {
 exports.getRecommendedTeam = async (req, res) => {
   try {
     const projectId = req.params.id;
-
     if (!projectId) {
       return res.status(400).json({
         success: false,
@@ -246,6 +245,7 @@ myHeaders.append("Content-Type", "application/json");
       "project": project,
       "teams":project.teamApplicants
     })
+    
     const requestOptions = {
       method: "POST",
       headers: myHeaders,
