@@ -43,7 +43,8 @@ router.route('/Project/getmyTeamprojectsWithOwner').get(isCompanyAuthenticated, 
 
 router.route('/Project/:projectId/applicants').get(getApplicants); // get applied freelancers or teams for a project
 
-router.route('/project/myTeamAssignedProjects').get(isAuthenticated,getTeamAssignedProjects);
+router.route('/project/myTeamAssignedProjects').get(isAuthenticated, getTeamAssignedProjects);
+
 router.route('/project/mySoloAssignedProjects').get(isAuthenticated,getSoloAssignedProjects);
 
 

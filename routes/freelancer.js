@@ -13,7 +13,7 @@ const {
 } = require("../controllers/freelancer");
 const { addMemberToTeam, fetchAllTeams } = require("../controllers/team");
 const { deleteMemberFromTeam } = require("../controllers/team");
-const { fetchteam } = require("../controllers/team");
+const { fetchteam,fetchteamMobile } = require("../controllers/team");
 const { searchFreelancer } = require("../controllers/freelancer");
 const { addTaskToMember, getAllTasks, submitTaskWork, saveTaskStatus } = require("../controllers/task");
 
@@ -35,6 +35,7 @@ router.route("/Freelancer/forgetpassword").post(forgetPassword)
 router.route("/Freelancer/resetpassword").post(resetPassword)
 router.route("/Freelancer/setnewpassword").put(setNewPassword)
 router.route("/Freelancer/fetchteam").get(isAuthenticated, fetchteam)
+router.route("/Freelancer/fetchteamMobile").get(isAuthenticated, fetchteamMobile)
 router.route("/Freelancer/fetchAllteam").get(fetchAllTeams),
 router.route("/Freelancer/addTeamMember").post(isAuthenticated, addMemberToTeam);
 router.route("/Freelancer/deleteMember").post(isAuthenticated, deleteMemberFromTeam);
