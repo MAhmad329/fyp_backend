@@ -73,7 +73,15 @@ var projectSchema = new mongoose.Schema({
   },
   deadline: {
     type: Date,
-    
+  },
+  paymentIntentId: String,
+  amount: String,
+  currency: String,
+  status: String,
+  status: {
+    type: String,
+    enum: ['posted', 'working', 'complete_request', 'disputed', 'completed'],
+    default: 'posted'
   }
 });
 

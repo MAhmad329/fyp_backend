@@ -16,6 +16,7 @@ exports.createProject = async (req, res) => {
       requiredSkills: req.body.requiredSkills,
       owner: req.company._id,
       deadline: req.body.deadline,
+      status: 'posted'
     };
 
     const newProject = await Projects.create(newProjectData);
@@ -303,7 +304,7 @@ myHeaders.append("Content-Type", "application/json");
       body: raw,
       redirect: "follow"
     };
-    const flaskApiResponse = await fetch("http://localhost:5000/recommend", requestOptions)
+    const flaskApiResponse = await fetch("http://127.0.0.1:5000/recommend", requestOptions)
     const flaskApiResponseJSON = await flaskApiResponse.json()
     
     const recommended_team = flaskApiResponseJSON.recommended_teams[0][0]
@@ -698,6 +699,57 @@ exports.getSoloAssignedProjects = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
+exports.markProjectAsComplete = async (req, res) => {
+  const projectId = req.params.id;
+  const userId = req.company.id;  // Assuming the user ID is attached to the request
+
+  console.log(userId);
+
+  try {
+    const project = await Projects.findById(projectId).populate('selectedTeam');
+
+    if (!project.requiresTeam) {
+      // Check if the user is the selected freelancer
+      if (project.selectedApplicant.equals(userId)) {
+        project.status = 'completed';
+        await project.save();
+
+        res.status(200).json({
+          success: true,
+          message: 'Project status updated to completed'
+        });
+      } else {
+        res.status(403).json({
+          success: false,
+          message: 'Unauthorized action'
+        });
+      }
+    } else {
+      console.log(project.selectedTeam.owner);
+      // Check if the user is the owner of the selected team
+      if (project.selectedTeam && project.selectedTeam.owner.equals(userId)) {
+        project.status = 'completed';
+        await project.save();
+
+        res.status(200).json({
+          success: true,
+          message: 'Project status updated to completed'
+        });
+      } else {
+        res.status(403).json({
+          success: false,
+          message: 'Unauthorized action'
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 

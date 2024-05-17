@@ -109,6 +109,7 @@ exports.selectFreelancerOrTeam = async (req, res) => {
       await freelancer.save();
     }
 
+    project.status='working';
     await project.save();
 
     res.status(200).json({success:true, message: 'Selection updated successfully', project });
