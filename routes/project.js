@@ -20,6 +20,7 @@ const {
   getCompanyTeamProjectsWithOwner,
   getAllProjectsMobile,
   markProjectAsComplete,
+  createCompleteRequest
 } = require("../controllers/project");
 var router = express.Router();
 const { isCompanyAuthenticated, isAuthenticated } = require("../middlewares/auth");
@@ -47,6 +48,8 @@ router.route('/Project/:projectId/applicants').get(getApplicants); // get applie
 router.route('/project/myTeamAssignedProjects').get(isAuthenticated, getTeamAssignedProjects);
 
 router.route('/project/mySoloAssignedProjects').get(isAuthenticated,getSoloAssignedProjects);
+
+router.route('/project/:id/completeRequest').put(isAuthenticated, createCompleteRequest);
 
 router.route('/project/:id/complete').put(isCompanyAuthenticated, markProjectAsComplete);
 
