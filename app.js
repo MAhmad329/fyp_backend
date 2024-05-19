@@ -22,6 +22,7 @@ var chatRouter = require("./routes/chat");
 var communityRouter = require("./routes/community");
 var paymentRouter = require("./routes/paymentRoute");
 const disputeRoutes = require('./routes/dispute');
+var adminRoutes=require('./routes/admin')
 
 const Team = require("./models/team");
 
@@ -166,6 +167,7 @@ app.use("/api/v1", chatRouter);
 app.use("/api/v1", communityRouter);
 app.use("/api/v1/payment", paymentRouter);
 app.use('/api/v1', disputeRoutes);
+app.use('/api/v1', adminRoutes);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
