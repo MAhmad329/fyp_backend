@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
-  sender: { type: mongoose.Schema.Types.ObjectId, ref: 'Freelancer' },
-  content: { type: String, required: true },
+  sender: { type: mongoose.Schema.Types.ObjectId, ref: 'Freelancer', required: true },
+  content: { type: String, required: false }, // Content is no longer required to allow file-only messages
+  fileUrl: { type: String, required: false }, // Add fileUrl field
+  fileType: { type: String, required: false }, // Add fileType field
   timestamp: { type: Date, default: Date.now },
   isRead: { type: Boolean, default: false }
 });

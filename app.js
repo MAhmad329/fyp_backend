@@ -52,7 +52,7 @@ io.on("connection", (socket) => {
   // When sending a message from the server, add a timestamp
   socket.on(
     "individual chat message",
-    async ({ sender, receiverId, content }) => {
+    async ({ sender, receiverId, content, fileUrl, fileType }) => {
       const receiverSocketId = activeUsers.get(receiverId);
       if (receiverSocketId && receiverSocketId !== socket.id) {
         const timestamp = new Date(); // Get current time
@@ -61,6 +61,8 @@ io.on("connection", (socket) => {
           sender,
           content,
           timestamp,
+          fileUrl,
+          fileType,
           isRead,
         });
       }
@@ -84,19 +86,22 @@ io.on("connection", (socket) => {
   // });
 
   socket.on(
-    "team chat message",
-    ({ teamId, sender, senderUsername, content }) => {
-      const timestamp = new Date();
-      const isRead = false;
-      io.to(teamId).emit("team chat message", {
-        sender,
-        senderUsername,
-        content,
-        timestamp,
-        isRead,
-      });
-    }
-  );
+  "team chat message",
+  ({ teamId, sender, senderUsername, content, fileUrl, fileType }) => {
+    const timestamp = new Date();
+    const isRead = false;
+    io.to(teamId).emit("team chat message", {
+      sender,
+      senderUsername,
+      content,
+      fileUrl,
+      fileType,
+      timestamp,
+      isRead,
+    });
+  }
+);
+
 
   socket.on("join team chat", ({ teamId }) => {
     socket.join(teamId);
