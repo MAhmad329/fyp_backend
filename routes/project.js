@@ -51,7 +51,7 @@ router.route('/project/mySoloAssignedProjects').get(isAuthenticated,getSoloAssig
 
 router.route('/project/:id/completeRequest').put(isAuthenticated, createCompleteRequest);
 
-router.route('/project/:id/complete').put(isCompanyAuthenticated, markProjectAsComplete);
+router.route('/project/:id/complete').put(markProjectAsComplete);
 
 
 

@@ -784,18 +784,18 @@ exports.createCompleteRequest = async (req, res) => {
 
 exports.markProjectAsComplete = async (req, res) => {
   const projectId = req.params.id;
-  const userId = req.company.id;  // Assuming the user ID is attached to the request
+  //const userId = req.company.id;  // Assuming the user ID is attached to the request
 
   try {
     const project = await Projects.findById(projectId);
 
     // Check if the user is the owner of the project
-    if (!project.owner.equals(userId)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Unauthorized action'
-      });
-    }
+    // if (!project.owner.equals(userId)) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: 'Unauthorized action'
+    //   });
+    // }
 
     // Check if there is an active dispute for the project
     const dispute = await Dispute.findOne({ project: projectId, status: 'active' });
