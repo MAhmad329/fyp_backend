@@ -18,15 +18,17 @@ exports.createPaymentIntent = async (req, res) => {
       currentProject.paymentIntentId = paymentIntent.id;
       currentProject.amount = paymentIntent.amount;
       currentProject.currency = paymentIntent.currency;
-      currentProject.status = paymentIntent.status;
+      currentProject.stripeStatus = paymentIntent.status;
 
       await currentProject.save();
     }
 
+    
     res.send({
       clientSecret: paymentIntent.client_secret,
       id: paymentIntent.id,
     });
+    
   } catch (error) {
     res.status(500).send({ error: error.message });
   }
