@@ -7,7 +7,8 @@ const {
   updateFreelancerProfile,
   forgetPassword,
   resetPassword,
-  setNewPassword
+  setNewPassword,
+  getAllFreelancers
 //   getMyFreelancerProfile,
 //   updateFreelancerProfile,
 } = require("../controllers/freelancer");
@@ -44,5 +45,7 @@ router.route('/Freelancer/:id/updateTask').put(isAuthenticated,addTaskToMember);
 router.route('/Freelancer/:id/getTasks').get(isAuthenticated,getAllTasks);
 router.route('/Freelancer/updateTask').put(isAuthenticated,submitTaskWork);
 router.route('/Freelancer/updateTaskStatus').put(isAuthenticated,saveTaskStatus);
+
+router.route("/Freelancer/AllFreelancers").get(getAllFreelancers);
 
 module.exports = router;

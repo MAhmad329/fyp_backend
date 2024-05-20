@@ -1,5 +1,6 @@
 const Freelancers = require("../models/freelancer");
 const { sendEmail } = require("../middlewares/sendEmail");
+const Company = require("../models/company");
 exports.loginFreelancer = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -134,6 +135,34 @@ exports.getFreelancerDetails = async (req, res) => {
     res.status(200).json({
       success: true,
       freelancer: freelancerDetails,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+exports.getAllFreelancers = async (req, res) => {
+  try {
+
+    const freelancer = await Freelancers.find()
+    const companies = await Company.find()
+      
+
+    if (!freelancer) {
+      return res.status(404).json({
+        success: false,
+        message: "Freelancer not found",
+      });
+    }
+
+    
+
+    res.status(200).json({
+      success: true,
+      freelancers: freelancer,
+      companies:companies
     });
   } catch (error) {
     res.status(500).json({
