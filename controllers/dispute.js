@@ -128,7 +128,7 @@ exports.getAllDisputes = async (req, res) => {
     }
 };
 
-const resetDisputeCount = async (req, res) => {
+exports.resetDisputeCount = async (req, res) => {
     const { disputeId } = req.params;
     
     try {
