@@ -127,3 +127,20 @@ exports.getAllDisputes = async (req, res) => {
         });
     }
 };
+
+const resetDisputeCount = async (req, res) => {
+    const { disputeId } = req.params;
+    
+    try {
+      const dispute = await Dispute.findById(disputeId);
+      if (!dispute) {
+        return res.status(404).json({ message: "Dispute not found" });
+      }
+  
+      dispute.count = 1; // Reset count to 1
+      await dispute.save();
+      res.status(200).json({ message: 'Dispute count has been reset', dispute });
+    } catch (error) {
+      res.status(500).json({ message: 'Error resetting dispute count', error: error.message });
+    }
+  };
