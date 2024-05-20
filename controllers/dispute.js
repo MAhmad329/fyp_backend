@@ -114,7 +114,7 @@ exports.resolveDispute = async (req, res) => {
 
 exports.getAllDisputes = async (req, res) => {
     try {
-        const disputes = await Dispute.find({});
+        const disputes = await Dispute.find({}).populate("project");
         res.status(200).json({
             success: true,
             count: disputes.length,
