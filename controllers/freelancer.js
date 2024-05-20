@@ -125,6 +125,7 @@ exports.getFreelancerDetails = async (req, res) => {
       education: freelancer.education,
       experience: freelancer.experience,
       pfp: freelancer.pfp,
+      cv:freelancer.cv,
       appliedProjects: freelancer.appliedProjects,
       teams: freelancer.teams
       // Add other details as needed
@@ -188,7 +189,7 @@ exports.updateFreelancerProfile = async (req, res) => {
     }
 
     // Extract the fields you want to update from the request body
-    const { firstname, lastname, username, aboutme, skills, education, experience, pfp,appliedProjects } = req.body;
+    const { firstname, lastname, username, aboutme, skills, education, experience, pfp, cv, appliedProjects } = req.body;
 
     // Update the freelancer's profile details
     if (firstname) freelancer.firstname = firstname;
@@ -199,6 +200,7 @@ exports.updateFreelancerProfile = async (req, res) => {
     if (education) freelancer.education = education;
     if (experience) freelancer.experience = experience;
     if (pfp) freelancer.pfp = pfp;
+    if (cv) freelancer.cv = cv;
     if (appliedProjects) freelancer.appliedProjects = appliedProjects;
 
     // Save the updated freelancer profile
@@ -225,6 +227,7 @@ exports.updateFreelancerProfile = async (req, res) => {
       education: freelancer.education,
       experience: freelancer.experience,
       pfp: freelancer.pfp,
+      cv: freelancer.cv,
       appliedProjects: freelancer.appliedProjects,
       // Add other details as needed
     };

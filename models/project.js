@@ -77,7 +77,7 @@ var projectSchema = new mongoose.Schema({
   paymentIntentId: String,
   amount: String,
   currency: String,
-  status: String,
+  stripeStatus: String,
   status: {
     type: String,
     enum: ['posted', 'working', 'complete_request', 'disputed', 'completed'],

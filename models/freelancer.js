@@ -47,6 +47,10 @@ var freelancerSchema = new mongoose.Schema({
     
   },
 
+  cv: {
+    type: String,
+  },
+
   skills: [{
     type: String,
   }],

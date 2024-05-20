@@ -4,7 +4,7 @@ const Team = require("../models/team"); // Import the Team model
 
 exports.sendMessage = async (req, res) => {
   try {
-    const { senderId,receiverId, content, type, team } = req.body;
+    const { senderId,receiverId, content, type, team, fileUrl, fileType } = req.body;
     let chat;
 
     if (type === 'individual') {
@@ -37,7 +37,7 @@ exports.sendMessage = async (req, res) => {
       await chat.save();
     }
 
-    const message = { sender: senderId, content }; // Create a message object with content
+    const message = { sender: senderId, content, fileUrl, fileType }; // Create a message object with content
     chat.messages.push(message); // Add the message object directly to the chat document
     await chat.save();
 
