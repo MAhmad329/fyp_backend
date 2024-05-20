@@ -15,6 +15,10 @@ const disputeSchema = new mongoose.Schema({
     enum: ['active', 'resolved'],
     default: 'active'
   },
+  count: {
+    type: Number,
+    default: 1 
+  },
   createdAt: {
     type: Date,
     default: Date.now

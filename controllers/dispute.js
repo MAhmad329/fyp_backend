@@ -45,13 +45,15 @@ exports.createDispute = async (req, res) => {
         if (dispute) {
             // If dispute exists, update it
             dispute.description = description;
+            dispute.count+=1;
             await dispute.save();
             res.status(200).send({ message: 'Dispute updated successfully', dispute });
         } else {
             // If no dispute exists, create a new one
             dispute = new Dispute({
                 description,
-                project: projectId
+                project: projectId,
+                count:1
             });
             await dispute.save();
             res.status(201).send(dispute);
@@ -80,7 +82,7 @@ exports.getDisputeByProjectId = async (req, res) => {
             return res.status(404).send({ message: 'No dispute found for this project' });
         }
 
-        res.status(200).send({ disputeId: dispute.id, description: dispute.description, projectTitle: dispute.project.title });
+        res.status(200).send({ disputeId: dispute.id, description: dispute.description, count:dispute.count, projectTitle: dispute.project.title, });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).send({ message: 'Error retrieving dispute', error });
@@ -108,4 +110,20 @@ exports.resolveDispute = async (req, res) => {
   } catch (error) {
     res.status(500).send({ message: 'Error resolving dispute', error });
   }
+};
+
+exports.getAllDisputes = async (req, res) => {
+    try {
+        const disputes = await Dispute.find({});
+        res.status(200).json({
+            success: true,
+            count: disputes.length,
+            data: disputes
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Server Error'
+        });
+    }
 };

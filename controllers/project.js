@@ -2,6 +2,7 @@ const Projects = require("../models/project");
 const Freelancer = require("../models/freelancer")
 const Companies = require("../models/company");
 const Team = require("../models/team");
+const Dispute =require("../models/dispute");
 
 exports.createProject = async (req, res) => {
   try {
@@ -751,6 +752,36 @@ exports.createCompleteRequest = async (req, res) => {
 };
 
 
+// exports.markProjectAsComplete = async (req, res) => {
+//   const projectId = req.params.id;
+//   const userId = req.company.id;  // Assuming the user ID is attached to the request
+
+//   try {
+//     const project = await Projects.findById(projectId);
+
+//     // Check if the user is the owner of the project
+//     if (project.owner.equals(userId)) {
+//       project.status = 'completed';
+//       await project.save();
+
+//       res.status(200).json({
+//         success: true,
+//         message: 'Project status updated to completed'
+//       });
+//     } else {
+//       res.status(403).json({
+//         success: false,
+//         message: 'Unauthorized action'
+//       });
+//     }
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message
+//     });
+//   }
+// };
+
 exports.markProjectAsComplete = async (req, res) => {
   const projectId = req.params.id;
   const userId = req.company.id;  // Assuming the user ID is attached to the request
@@ -759,20 +790,28 @@ exports.markProjectAsComplete = async (req, res) => {
     const project = await Projects.findById(projectId);
 
     // Check if the user is the owner of the project
-    if (project.owner.equals(userId)) {
-      project.status = 'completed';
-      await project.save();
-
-      res.status(200).json({
-        success: true,
-        message: 'Project status updated to completed'
-      });
-    } else {
-      res.status(403).json({
+    if (!project.owner.equals(userId)) {
+      return res.status(403).json({
         success: false,
         message: 'Unauthorized action'
       });
     }
+
+    // Check if there is an active dispute for the project
+    const dispute = await Dispute.findOne({ project: projectId, status: 'active' });
+    if (dispute) {
+      dispute.status = 'resolved';
+      await dispute.save();
+    }
+
+    // Update the project status to completed
+    project.status = 'completed';
+    await project.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Project status updated to completed, and any active disputes resolved'
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
